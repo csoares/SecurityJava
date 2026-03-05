@@ -20,17 +20,17 @@ Each letter is shifted by a fixed number of positions in the alphabet. Named aft
 flowchart LR
     subgraph Encrypt ["🔒 Encryption  (key = shift 3)"]
         direction LR
-        PL["Plaintext\n'H E L L O'"]
-        OP["+3 to each\nletter's position"]
-        CT["Ciphertext\n'K H O O R'"]
+        PL["Plaintext<br/>'H E L L O'"]
+        OP["+3 to each<br/>letter's position"]
+        CT["Ciphertext<br/>'K H O O R'"]
         PL --> OP --> CT
     end
 
     subgraph Decrypt ["🔓 Decryption  (same key, reversed)"]
         direction LR
-        CT2["Ciphertext\n'K H O O R'"]
-        OP2["-3 from each\nletter's position"]
-        PL2["Plaintext\n'H E L L O'"]
+        CT2["Ciphertext<br/>'K H O O R'"]
+        OP2["-3 from each<br/>letter's position"]
+        PL2["Plaintext<br/>'H E L L O'"]
         CT2 --> OP2 --> PL2
     end
 ```
@@ -98,8 +98,8 @@ flowchart TD
 
 ```mermaid
 flowchart LR
-    CC["Caesar\nONE shift\nBrute force: 25 tries\n→ trivially broken"]
-    VC["Vigenère\nN different shifts\nBrute force: 26^N tries\n→ huge key space"]
+    CC["Caesar<br/>ONE shift<br/>Brute force: 25 tries<br/>→ trivially broken"]
+    VC["Vigenère<br/>N different shifts<br/>Brute force: 26^N tries<br/>→ huge key space"]
     CC -->|"much stronger"| VC
 ```
 
@@ -108,17 +108,17 @@ flowchart LR
 ```mermaid
 flowchart TD
     subgraph Kasiski ["⚠️ Kasiski Examination"]
-        K1["Find repeated trigrams in ciphertext\ne.g. 'XYZ' appears at positions 5 and 20"]
+        K1["Find repeated trigrams in ciphertext<br/>e.g. 'XYZ' appears at positions 5 and 20"]
         K2["Distance = 20 − 5 = 15"]
         K3["Key length divides 15: factors are 1, 3, 5, 15"]
-        K4["Try key length = 3 → split ciphertext into 3 Caesar streams\n→ frequency-analyse each one separately"]
+        K4["Try key length = 3 → split ciphertext into 3 Caesar streams<br/>→ frequency-analyse each one separately"]
         K1 --> K2 --> K3 --> K4
     end
 
     subgraph IC ["📊 Index of Coincidence"]
         IC1["Random text   IC ≈ 0.038"]
         IC2["English text  IC ≈ 0.067"]
-        IC3["Vigenère      IC between 0.038 – 0.067\n(closer to 0.067 = shorter key)"]
+        IC3["Vigenère      IC between 0.038 – 0.067<br/>(closer to 0.067 = shorter key)"]
         IC1 --- IC2 --- IC3
     end
 ```

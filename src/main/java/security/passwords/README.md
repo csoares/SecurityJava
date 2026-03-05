@@ -17,21 +17,21 @@ mvn exec:java -Dexec.mainClass="security.passwords.PasswordHashingExample"
 flowchart TD
     subgraph Stage1 ["❌ Stage 1: Plain SHA-256  (NEVER do this)"]
         P1["'password'"] -->|"SHA-256"| H1["5e884898da28..."]
-        H1 --> RT[("Rainbow Table\nbillions of precomputed entries")]
+        H1 --> RT[("Rainbow Table<br/>billions of precomputed entries")]
         RT -->|"O(1) instant lookup"| CRACK1["💥 CRACKED"]
-        NOTE1["Same password → same hash always\nTwo users with 'password' exposed at once\nGPU: billions of SHA-256/sec"]
+        NOTE1["Same password → same hash always<br/>Two users with 'password' exposed at once<br/>GPU: billions of SHA-256/sec"]
     end
 
     subgraph Stage2 ["⚠️ Stage 2: SHA-256 + Salt  (better, still fast)"]
-        SALT2["Random Salt\n(16 bytes, unique per user)"] --> MIX["SHA-256(salt ‖ password)"]
+        SALT2["Random Salt<br/>(16 bytes, unique per user)"] --> MIX["SHA-256(salt ‖ password)"]
         P2["'password'"] --> MIX --> H2["unique hash per user"]
-        NOTE2["Rainbow tables: defeated ✅\nGPU brute force: still billions/sec ❌\nSHA-256 is designed to be fast — bad for passwords"]
+        NOTE2["Rainbow tables: defeated ✅<br/>GPU brute force: still billions/sec ❌<br/>SHA-256 is designed to be fast — bad for passwords"]
     end
 
     subgraph Stage3 ["✅ Stage 3: PBKDF2  (recommended)"]
-        SALT3["Unique Salt"] --> SLOW["310,000 rounds\nof HMAC-SHA256"]
-        P3["'password'"] --> SLOW --> H3["derived key\n(256 bits)"]
-        NOTE3["Each guess costs 310,000 HMAC operations\nGPU drops from billions/sec to thousands/sec\nFactor of ~10^6 harder to crack"]
+        SALT3["Unique Salt"] --> SLOW["310,000 rounds<br/>of HMAC-SHA256"]
+        P3["'password'"] --> SLOW --> H3["derived key<br/>(256 bits)"]
+        NOTE3["Each guess costs 310,000 HMAC operations<br/>GPU drops from billions/sec to thousands/sec<br/>Factor of ~10^6 harder to crack"]
     end
 
     Stage1 --> Stage2 --> Stage3
@@ -81,9 +81,9 @@ sequenceDiagram
 ```mermaid
 flowchart TD
     subgraph Algorithms ["Algorithm Comparison"]
-        A1["PBKDF2WithHmacSHA256\n✅ Java built-in (no extra library)\n✅ FIPS-compliant\n⚠️ Not memory-hard — GPU-friendly"]
-        A2["bcrypt\n✅ Widely adopted, battle-tested\n✅ Automatic work factor\n⚠️ Limited to 72-byte passwords"]
-        A3["Argon2id\n✅ Memory-hard — GPU/ASIC resistant\n✅ 2024 OWASP first choice\n✅ Configurable memory + time cost"]
+        A1["PBKDF2WithHmacSHA256<br/>✅ Java built-in (no extra library)<br/>✅ FIPS-compliant<br/>⚠️ Not memory-hard — GPU-friendly"]
+        A2["bcrypt<br/>✅ Widely adopted, battle-tested<br/>✅ Automatic work factor<br/>⚠️ Limited to 72-byte passwords"]
+        A3["Argon2id<br/>✅ Memory-hard — GPU/ASIC resistant<br/>✅ 2024 OWASP first choice<br/>✅ Configurable memory + time cost"]
         A1 --- A2 --- A3
     end
 ```

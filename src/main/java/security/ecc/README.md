@@ -16,14 +16,14 @@ mvn exec:java -Dexec.mainClass="security.ecc.ECCSignatureExample"
 ```mermaid
 flowchart TD
     subgraph Sign ["✍️ Signing  (private key — signer only)"]
-        MSG["Message\n'Transfer 100 shares of ACME Corp'"]
-        HASH["SHA-256 Hash\n(32 bytes)"]
-        RND["Random nonce k\n(different every time — CRITICAL)"]
-        SIG["Signature (r, s)\n~64–70 bytes for P-256"]
+        MSG["Message<br/>'Transfer 100 shares of ACME Corp'"]
+        HASH["SHA-256 Hash<br/>(32 bytes)"]
+        RND["Random nonce k<br/>(different every time — CRITICAL)"]
+        SIG["Signature (r, s)<br/>~64–70 bytes for P-256"]
         MSG -->|"SHA-256"| HASH
-        HASH -->|"ECDSA sign\n(private key + k)"| SIG
+        HASH -->|"ECDSA sign<br/>(private key + k)"| SIG
         RND --> SIG
-        WARN["⚠️ If k is reused even once → private key is mathematically recovered!\n(This is exactly how the PS3 master key was stolen in 2010)"]
+        WARN["⚠️ If k is reused even once → private key is mathematically recovered!<br/>(This is exactly how the PS3 master key was stolen in 2010)"]
     end
 
     subgraph Verify ["🔍 Verification  (public key — anyone can do this)"]
@@ -32,7 +32,7 @@ flowchart TD
         HASH2["SHA-256 Hash"]
         RESULT{"Valid?"}
         MSG2 -->|"SHA-256"| HASH2
-        HASH2 -->|"ECDSA verify\n(public key)"| RESULT
+        HASH2 -->|"ECDSA verify<br/>(public key)"| RESULT
         SIG2 --> RESULT
         RESULT -->|"yes"| OK["✅ Authentic & Unmodified"]
         RESULT -->|"no"| FAIL["❌ Tampered or wrong key"]
@@ -57,7 +57,7 @@ flowchart LR
         E4["Security:    ~128-bit  (MORE secure!)"]
     end
 
-    RSA -->|"8× smaller keys\nstronger security"| ECC
+    RSA -->|"8× smaller keys<br/>stronger security"| ECC
 ```
 
 ### Real-World Uses
@@ -79,8 +79,8 @@ flowchart TD
 ```mermaid
 flowchart LR
     subgraph Hardness ["Hard Problems That Provide Security"]
-        RSA_H["RSA security:\nInteger Factorisation Problem\nGiven n = p × q, find p and q\nFeasible at 512-bit, hard at 2048-bit"]
-        ECC_H["ECC security:\nElliptic Curve Discrete Log Problem (ECDLP)\nGiven P = k × G, find k\nHarder per bit — 256-bit ECC ≈ 3072-bit RSA"]
+        RSA_H["RSA security:<br/>Integer Factorisation Problem<br/>Given n = p × q, find p and q<br/>Feasible at 512-bit, hard at 2048-bit"]
+        ECC_H["ECC security:<br/>Elliptic Curve Discrete Log Problem (ECDLP)<br/>Given P = k × G, find k<br/>Harder per bit — 256-bit ECC ≈ 3072-bit RSA"]
         RSA_H --- ECC_H
     end
 ```

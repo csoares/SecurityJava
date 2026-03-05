@@ -15,14 +15,14 @@ mvn exec:java -Dexec.mainClass="security.pki.CertificateChainExample"
 
 ```mermaid
 flowchart TD
-    ROOT["🏛️ Root CA\nCN=Example Root CA\nSelf-signed  (subject == issuer)\nStored in browser / OS trust store\nPrivate key kept OFFLINE in a vault"]
-    INT["🏢 Intermediate CA\nCN=Example Intermediate CA\nIssuer = Root CA\nSigned by Root CA's private key\nKept ONLINE to sign site certificates"]
-    SERVER["🌐 Server Certificate\nCN=www.example.com\nIssuer = Intermediate CA\nContains server's RSA/EC public key\nPresented during TLS handshake"]
+    ROOT["🏛️ Root CA<br/>CN=Example Root CA<br/>Self-signed  (subject == issuer)<br/>Stored in browser / OS trust store<br/>Private key kept OFFLINE in a vault"]
+    INT["🏢 Intermediate CA<br/>CN=Example Intermediate CA<br/>Issuer = Root CA<br/>Signed by Root CA's private key<br/>Kept ONLINE to sign site certificates"]
+    SERVER["🌐 Server Certificate<br/>CN=www.example.com<br/>Issuer = Intermediate CA<br/>Contains server's RSA/EC public key<br/>Presented during TLS handshake"]
 
     ROOT -->|"signs"| INT
     INT  -->|"signs"| SERVER
 
-    NOTE["Trust flows DOWN the chain.\nEach certificate contains the issuer's digital signature.\nVerification goes UP the chain to the trusted Root CA."]
+    NOTE["Trust flows DOWN the chain.<br/>Each certificate contains the issuer's digital signature.<br/>Verification goes UP the chain to the trusted Root CA."]
 ```
 
 ### Chain Validation — What the Browser Does
@@ -45,8 +45,8 @@ flowchart TD
     subgraph Why ["❓ Why Not Root CA → Server Directly?"]
         W1["Root CA private key kept OFFLINE — extremely high security"]
         W2["Intermediate CA kept ONLINE to issue certificates daily"]
-        W3["If Intermediate CA is compromised:\nRevoke that intermediate — Root CA is unaffected\nMillions of other intermediates still valid"]
-        W4["If Root CA were used directly and compromised:\nEntire PKI collapses — all certificates untrusted"]
+        W3["If Intermediate CA is compromised:<br/>Revoke that intermediate — Root CA is unaffected<br/>Millions of other intermediates still valid"]
+        W4["If Root CA were used directly and compromised:<br/>Entire PKI collapses — all certificates untrusted"]
         W1 --> W2 --> W3 --> W4
     end
 ```
@@ -93,8 +93,8 @@ sequenceDiagram
 ```mermaid
 flowchart TD
     subgraph CertFields ["📄 X.509 Certificate Fields"]
-        F1["Subject DN: who this certificate identifies\ne.g. CN=www.example.com, O=Example Corp, C=US"]
-        F2["Issuer DN: who signed this certificate\ne.g. CN=Example Intermediate CA"]
+        F1["Subject DN: who this certificate identifies<br/>e.g. CN=www.example.com, O=Example Corp, C=US"]
+        F2["Issuer DN: who signed this certificate<br/>e.g. CN=Example Intermediate CA"]
         F3["Public Key: the subject's RSA or EC public key"]
         F4["Validity: notBefore and notAfter dates"]
         F5["Serial Number: unique per issuing CA"]
