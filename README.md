@@ -22,16 +22,16 @@ mvn exec:java -Dexec.mainClass="security.mac.HMACExample"
 
 ```mermaid
 flowchart TD
-    A["🏛️ Classical Ciphers\nCaesar · Vigenère"]
-    B["🔒 Symmetric Encryption\nAES-256-CBC"]
-    C["📦 Cipher Modes\nECB · CBC · GCM"]
-    D["🔑 Asymmetric Encryption\nRSA-2048"]
-    E["📐 Elliptic Curve Crypto\nECDSA · ECDH"]
-    F["🤝 Key Exchange\nDiffie-Hellman · ECDH"]
-    G["🔍 Integrity & Signatures\nHash · HMAC · Digital Signatures"]
-    H["🔐 Password Security\nSHA-256 → Salt → PBKDF2"]
-    I["🏛️ PKI & Certificates\nX.509 Certificate Chains"]
-    J["⚠️ Attack Demonstrations\nTiming · Weak RNG · Rainbow Tables"]
+    A["🏛️ Classical Ciphers<br/>Caesar · Vigenère"]
+    B["🔒 Symmetric Encryption<br/>AES-256-CBC"]
+    C["📦 Cipher Modes<br/>ECB · CBC · GCM"]
+    D["🔑 Asymmetric Encryption<br/>RSA-2048"]
+    E["📐 Elliptic Curve Crypto<br/>ECDSA · ECDH"]
+    F["🤝 Key Exchange<br/>Diffie-Hellman · ECDH"]
+    G["🔍 Integrity & Signatures<br/>Hash · HMAC · Digital Signatures"]
+    H["🔐 Password Security<br/>SHA-256 → Salt → PBKDF2"]
+    I["🏛️ PKI & Certificates<br/>X.509 Certificate Chains"]
+    J["⚠️ Attack Demonstrations<br/>Timing · Weak RNG · Rainbow Tables"]
 
     A --> B --> C --> D --> E --> F --> G --> H --> I --> J
 
@@ -57,18 +57,18 @@ Each package has its own `README.md` with rendered Mermaid diagrams and concept 
 graph LR
     subgraph security
         subgraph encryption
-            classic["classic\nCaesarCipher\nVigenereCipher"]
-            symmetric["symmetric\nSymmetricEncryptionExample"]
-            asymmetric["asymmetric\nAsymmetricEncryptionExample"]
-            modes["modes\nCipherModesComparison"]
-            integrity["integrity\nIntegrityCheckHash\nIntegrityCheckSignature\nFileDigitalSignature"]
+            classic["classic<br/>CaesarCipher<br/>VigenereCipher"]
+            symmetric["symmetric<br/>SymmetricEncryptionExample"]
+            asymmetric["asymmetric<br/>AsymmetricEncryptionExample"]
+            modes["modes<br/>CipherModesComparison"]
+            integrity["integrity<br/>IntegrityCheckHash<br/>IntegrityCheckSignature<br/>FileDigitalSignature"]
         end
-        mac["mac\nHMACExample"]
-        keyexchange["keyexchange\nDiffieHellmanExample\nECDHExample"]
-        ecc["ecc\nECCSignatureExample"]
-        passwords["passwords\nPasswordHashingExample"]
-        pki["pki\nCertificateChainExample"]
-        attacks["attacks\nTimingAttackExample\nWeakRandomnessExample\nRainbowTableExample"]
+        mac["mac<br/>HMACExample"]
+        keyexchange["keyexchange<br/>DiffieHellmanExample<br/>ECDHExample"]
+        ecc["ecc<br/>ECCSignatureExample"]
+        passwords["passwords<br/>PasswordHashingExample"]
+        pki["pki<br/>CertificateChainExample"]
+        attacks["attacks<br/>TimingAttackExample<br/>WeakRandomnessExample<br/>RainbowTableExample"]
     end
 ```
 
@@ -96,11 +96,11 @@ graph LR
 
 ```mermaid
 flowchart LR
-    P["Plaintext\n'HELLO'"]
-    K["Key\nshift = 3"]
-    C["Ciphertext\n'KHOOR'"]
-    A["Brute Force\n(26 possible keys)"]
-    F["Frequency Analysis\n(E=13%, T=9%...)"]
+    P["Plaintext<br/>'HELLO'"]
+    K["Key<br/>shift = 3"]
+    C["Ciphertext<br/>'KHOOR'"]
+    A["Brute Force<br/>(26 possible keys)"]
+    F["Frequency Analysis<br/>(E=13%, T=9%...)"]
 
     P -->|"encrypt: +key"| C
     K --> C
@@ -159,14 +159,13 @@ sequenceDiagram
 flowchart TD
     subgraph ECB ["❌ ECB — Electronic Code Book (INSECURE)"]
         direction LR
-        P1["Block 1\n'YELLOW SUB'"] --> E1["AES"] --> C1["Block 1 out"]
-        P2["Block 2\n'YELLOW SUB'"] --> E2["AES"] --> C2["Block 2 out"]
-        P3["Block 3\n'YELLOW SUB'"] --> E3["AES"] --> C3["Block 3 out"]
-        Note1["⚠️ C1 == C2 == C3\nIdentical input = identical output\nPatterns are visible!"]
+        P1["Block 1<br/>'YELLOW SUB'"] --> E1["AES"] --> C1["Block 1 out"]
+        P2["Block 2<br/>'YELLOW SUB'"] --> E2["AES"] --> C2["Block 2 out"]
+        P3["Block 3<br/>'YELLOW SUB'"] --> E3["AES"] --> C3["Block 3 out"]
+        C1 & C2 & C3 --> Note1["⚠️ C1 == C2 == C3<br/>Identical input → identical output<br/>Patterns are visible!"]
     end
 
     subgraph CBC ["✅ CBC — Cipher Block Chaining"]
-        direction LR
         IV["Random IV"] --> XOR1["XOR"]
         P4["Block 1"] --> XOR1 --> AES1["AES"] --> CC1["C1"]
         CC1 --> XOR2["XOR"]
@@ -176,10 +175,9 @@ flowchart TD
     end
 
     subgraph GCM ["🏆 GCM — Galois/Counter Mode (BEST)"]
-        direction LR
         P7["Plaintext"] --> AES4["AES-CTR"] --> CT["Ciphertext"]
         CT --> GHASH["GHASH"] --> TAG["Auth Tag"]
-        Note2["Encrypts AND authenticates\nTampering detected automatically"]
+        TAG --> Note2["Encrypts AND authenticates<br/>Tampering detected automatically"]
     end
 ```
 
@@ -231,16 +229,16 @@ flowchart LR
 
     subgraph Sig ["✍️ Digital Signature — Integrity + Authenticity"]
         M2["Message"] -->|"SHA-256"| H2["Hash"]
-        H2 -->|"RSA sign\n(private key)"| S["Signature"]
-        S -->|"RSA verify\n(public key)"| V2{"Valid?"}
+        H2 -->|"RSA sign<br/>(private key)"| S["Signature"]
+        S -->|"RSA verify<br/>(public key)"| V2{"Valid?"}
     end
 
     subgraph File ["📄 File Signing"]
-        F["File"] --> FS["Sign file\n(private key)"]
+        F["File"] --> FS["Sign file<br/>(private key)"]
         FS --> SIG["signature.sig"]
-        F2["File (received)"] --> FV["Verify\n(public key)"]
+        F2["File (received)"] --> FV["Verify<br/>(public key)"]
         SIG --> FV
-        FV --> R{"Authentic\n& Unmodified?"}
+        FV --> R{"Authentic<br/>& Unmodified?"}
     end
 ```
 
@@ -279,10 +277,10 @@ sequenceDiagram
 ```mermaid
 flowchart LR
     subgraph DH ["Classic Diffie-Hellman"]
-        DH1["~256-byte keys\n2048-bit security\nSlower handshake"]
+        DH1["~256-byte keys<br/>2048-bit security<br/>Slower handshake"]
     end
     subgraph ECDH ["Elliptic Curve DH (ECDH)"]
-        EC1["~32-byte keys\n256-bit ECC ≈ 2048-bit DH security\nFaster, smaller — used in TLS 1.3"]
+        EC1["~32-byte keys<br/>256-bit ECC ≈ 2048-bit DH security<br/>Faster, smaller — used in TLS 1.3"]
     end
     DH --> |"Same idea, better math"| ECDH
 ```
@@ -302,15 +300,11 @@ flowchart LR
 
 ```mermaid
 flowchart TD
-    subgraph Comparison ["Authentication Spectrum"]
-        direction LR
-        H["🔍 Hash\nSHA-256(message)\n\nNo key\nAnyone can forge\nIntegrity only"]
-        HM["🔑 HMAC\nHMAC-SHA256(key, message)\n\nShared secret key\nForgery requires the key\nIntegrity + Authentication"]
-        DS["✍️ Digital Signature\nSign(privateKey, message)\n\nAsymmetric key pair\nOnly private key can sign\n+ Non-repudiation"]
-
-        H -->|"Add symmetric key"| HM
-        HM -->|"Switch to asymmetric keys"| DS
-    end
+    H["🔍 Hash — SHA-256(message)<br/>No key · Anyone can forge · Integrity only"]
+    HM["🔑 HMAC — HMAC-SHA256(key, message)<br/>Shared secret key · Forgery requires the key<br/>Integrity + Authentication"]
+    DS["✍️ Digital Signature — Sign(privateKey, message)<br/>Asymmetric key pair · Only private key can sign<br/>Integrity + Authentication + Non-repudiation"]
+    H -->|"Add symmetric key"| HM
+    HM -->|"Switch to asymmetric keys"| DS
 ```
 
 ```mermaid
@@ -345,23 +339,23 @@ sequenceDiagram
 flowchart TD
     subgraph Stage1 ["❌ Stage 1: Plain SHA-256 (INSECURE)"]
         P1["password"] -->|"SHA-256"| H1["5e884898..."]
-        H1 --> RT[("Rainbow Table\n10B entries")]
+        H1 --> RT[("Rainbow Table<br/>10B entries")]
         RT -->|"instant lookup"| CRACK1["💥 CRACKED"]
     end
 
     subgraph Stage2 ["⚠️ Stage 2: SHA-256 + Salt (BETTER)"]
-        SALT["Random Salt\nper user"] --> COMBINE["salt + password"]
+        SALT["Random Salt<br/>per user"] --> COMBINE["salt + password"]
         P2["password"] --> COMBINE
         COMBINE -->|"SHA-256"| H2["unique hash"]
-        H2 --> BRUTE["Brute Force\n(billions/sec on GPU)"]
+        H2 --> BRUTE["Brute Force<br/>(billions/sec on GPU)"]
         BRUTE --> CRACK2["💥 Still fast to crack"]
     end
 
     subgraph Stage3 ["✅ Stage 3: PBKDF2 / bcrypt / Argon2 (SECURE)"]
-        P3["password"] --> SLOW["310,000 rounds\nof HMAC-SHA256"]
+        P3["password"] --> SLOW["310,000 rounds<br/>of HMAC-SHA256"]
         SALT2["Unique Salt"] --> SLOW
         SLOW --> H3["derived key"]
-        H3 --> HARD["GPU: ~100ms per guess\n= impractical brute force"]
+        H3 --> HARD["GPU: ~100ms per guess<br/>= impractical brute force"]
     end
 
     Stage1 --> Stage2 --> Stage3
@@ -382,21 +376,23 @@ flowchart TD
 ```mermaid
 flowchart LR
     subgraph RSA ["RSA-2048"]
-        RSAP["Private key: ~1200 bytes\nPublic key: ~294 bytes\nSecurity: ~112 bits\nMath: modular exponentiation"]
+        RSAP["Private key: ~1200 bytes<br/>Public key: ~294 bytes<br/>Security: ~112 bits<br/>Math: modular exponentiation"]
     end
 
     subgraph ECC ["ECDSA / ECDH (P-256)"]
-        ECCP["Private key: ~67 bytes\nPublic key: ~91 bytes\nSecurity: ~128 bits\nMath: elliptic curve groups"]
+        ECCP["Private key: ~67 bytes<br/>Public key: ~91 bytes<br/>Security: ~128 bits<br/>Math: elliptic curve groups"]
     end
 
-    RSA -->|"8× smaller\nmore secure"| ECC
+    RSA -->|"8× smaller<br/>more secure"| ECC
 
     subgraph Uses ["Real-world uses of ECC"]
-        U1["Bitcoin / Ethereum\nTransaction signing (secp256k1)"]
-        U2["TLS 1.3\nECDHE key exchange + ECDSA certs"]
-        U3["JWT ES256\nAPI token signing"]
-        U4["SSH\necdsa-sha2-nistp256 key type"]
+        U1["Bitcoin / Ethereum<br/>Transaction signing (secp256k1)"]
+        U2["TLS 1.3<br/>ECDHE key exchange + ECDSA certs"]
+        U3["JWT ES256<br/>API token signing"]
+        U4["SSH<br/>ecdsa-sha2-nistp256 key type"]
+        U1 --- U2 --- U3 --- U4
     end
+    ECC --> Uses
 ```
 
 | File | Key concepts |
@@ -413,21 +409,22 @@ flowchart LR
 
 ```mermaid
 flowchart TD
-    ROOT["🏛️ Root CA\nCN=DigiCert Root\nSelf-signed\nPre-installed in your browser/OS"]
-    INT["🏢 Intermediate CA\nCN=DigiCert TLS\nSigned by Root CA"]
-    SERVER["🌐 Server Certificate\nCN=www.example.com\nSigned by Intermediate CA\nContains server's public key"]
+    ROOT["🏛️ Root CA<br/>CN=DigiCert Root<br/>Self-signed<br/>Pre-installed in your browser/OS"]
+    INT["🏢 Intermediate CA<br/>CN=DigiCert TLS<br/>Signed by Root CA"]
+    SERVER["🌐 Server Certificate<br/>CN=www.example.com<br/>Signed by Intermediate CA<br/>Contains server's public key"]
 
     ROOT -->|"signs"| INT
     INT -->|"signs"| SERVER
 
     BROWSER["🌐 Your Browser"]
-    TRUST["🔒 Trusted Root Store\n~50 built-in Root CAs"]
+    TRUST["🔒 Trusted Root Store<br/>~50 built-in Root CAs"]
+    OK["🔒 Trust established"]
 
-    BROWSER -->|"1. receives cert chain"| SERVER
-    BROWSER -->|"2. validates chain"| INT
-    BROWSER -->|"3. chains up to"| ROOT
-    BROWSER -->|"4. checks against"| TRUST
-    TRUST -->|"found! trust established"| BROWSER
+    BROWSER -->|"1. receives"| SERVER
+    BROWSER -->|"2. verifies signature"| INT
+    BROWSER -->|"3. verifies signature"| ROOT
+    ROOT -->|"4. check against"| TRUST
+    TRUST -->|"✅ Root known"| OK
 
     style ROOT fill:#d4edda
     style INT fill:#cce5ff
@@ -485,12 +482,12 @@ sequenceDiagram
 ```mermaid
 flowchart LR
     subgraph Weak ["❌ java.util.Random"]
-        SEED["Seed = currentTimeMillis()"] --> LCG["Linear Congruential\nGenerator"] --> OUT1["'Random' numbers"]
-        GUESS["Attacker guesses seed\n±5 second window\n= ~10,000 tries"] --> LCG2["Same LCG"] --> SAME["Identical output\n💥 Token forged"]
+        SEED["Seed = currentTimeMillis()"] --> LCG["Linear Congruential<br/>Generator"] --> OUT1["'Random' numbers"]
+        GUESS["Attacker guesses seed<br/>±5 second window<br/>= ~10,000 tries"] --> LCG2["Same LCG"] --> SAME["Identical output<br/>💥 Token forged"]
     end
 
     subgraph Strong ["✅ java.security.SecureRandom"]
-        ENTROPY["OS entropy pool\n(hardware noise, timing...)"] --> CSPRNG["CSPRNG\n(e.g., DRBG)"] --> OUT2["Truly unpredictable\n256-bit tokens"]
+        ENTROPY["OS entropy pool<br/>(hardware noise, timing...)"] --> CSPRNG["CSPRNG<br/>(e.g., DRBG)"] --> OUT2["Truly unpredictable<br/>256-bit tokens"]
     end
 ```
 
@@ -510,13 +507,13 @@ flowchart TD
     end
 
     subgraph Defense ["Salted hashes — attack fails"]
-        SALT["Random Salt\n(unique per user)"] --> COMBINE["salt + password"]
+        SALT["Random Salt<br/>(unique per user)"] --> COMBINE["salt + password"]
         COMBINE -->|SHA-256| UNIQUE["a8c3f2b1... (unique)"]
         UNIQUE -->|"lookup"| NOTFOUND["NOT IN TABLE ✅"]
     end
 
     Build --> Attack
-    Build -.->|"table useless\nagainst salted hashes"| Defense
+    Build -.->|"table useless<br/>against salted hashes"| Defense
 ```
 
 | File | Key concepts |
@@ -533,19 +530,19 @@ flowchart TD
 flowchart TD
     Q["What do you need?"]
 
-    Q --> CONF["Confidentiality\n(only intended reader can read)"]
-    Q --> INT["Integrity\n(detect if data was modified)"]
-    Q --> AUTH["Authentication\n(prove who sent it)"]
-    Q --> NONREP["Non-repudiation\n(sender cannot deny sending)"]
+    Q --> CONF["Confidentiality<br/>(only intended reader can read)"]
+    Q --> INT["Integrity<br/>(detect if data was modified)"]
+    Q --> AUTH["Authentication<br/>(prove who sent it)"]
+    Q --> NONREP["Non-repudiation<br/>(sender cannot deny sending)"]
 
-    CONF --> AES["AES-256-GCM\nor AES-256-CBC"]
-    INT --> HASH["SHA-256 hash\n(transit integrity)"]
-    INT --> HMAC2["HMAC-SHA256\n(authenticated integrity)"]
+    CONF --> AES["AES-256-GCM<br/>or AES-256-CBC"]
+    INT --> HASH["SHA-256 hash<br/>(transit integrity)"]
+    INT --> HMAC2["HMAC-SHA256<br/>(authenticated integrity)"]
     AUTH --> HMAC2
-    AUTH --> SIG["RSA / ECDSA\nDigital Signature"]
+    AUTH --> SIG["RSA / ECDSA<br/>Digital Signature"]
     NONREP --> SIG
 
-    CONF --> RSA2["RSA / ECDSA\n(for key exchange)"]
+    CONF --> RSA2["RSA / ECDSA<br/>(for key exchange)"]
 
     style Q fill:#f0f0f0
     style AES fill:#b7d5e8

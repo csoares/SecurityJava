@@ -67,7 +67,7 @@ flowchart TD
     R3["Session tokens, API keys, CSRF tokens"]
     R4["Any secret byte sequence"]
     RULE --> R1 & R2 & R3 & R4
-    NEVER["Never use  ==  .equals()  Arrays.equals()  for secret comparison\nEven a remote HTTP response-time difference is measurable"]
+    R1 & R2 & R3 & R4 --> NEVER["⚠️ Never use == / .equals() / Arrays.equals() for secrets<br/>Even a remote HTTP timing difference is measurable"]
 ```
 
 ---
@@ -81,17 +81,17 @@ Cryptography depends on **unpredictability**. `java.util.Random` is seeded from 
 ```mermaid
 flowchart TD
     subgraph Weak ["❌ java.util.Random — Predictable"]
-        SEED["Seed = System.currentTimeMillis()\n(attacker can guess: ±5 sec = ~10,000 tries)"]
-        LCG["Linear Congruential Generator\nnext = (a × current + c) mod m\nFully deterministic formula"]
+        SEED["Seed = System.currentTimeMillis()<br/>(attacker can guess: ±5 sec = ~10,000 tries)"]
+        LCG["Linear Congruential Generator<br/>next = (a × current + c) mod m<br/>Fully deterministic formula"]
         OUT["Output: 2423, 9550, 6394, ..."]
         ATKSEED["Attacker tries all seeds in the window"] --> ATKOUT["Reproduces exact sequence 💥"]
         SEED --> LCG --> OUT
     end
 
     subgraph Strong ["✅ java.security.SecureRandom — Unpredictable"]
-        ENTROPY["OS Entropy Pool\n• CPU timing jitter\n• Hardware RNG\n• Network packet timings\n• Disk I/O timing"]
-        DRBG["CSPRNG (DRBG)\nCryptographically Secure\nPseudo-Random Number Generator"]
-        SOUT["Output: computationally\nindistinguishable from true random"]
+        ENTROPY["OS Entropy Pool<br/>• CPU timing jitter<br/>• Hardware RNG<br/>• Network packet timings<br/>• Disk I/O timing"]
+        DRBG["CSPRNG (DRBG)<br/>Cryptographically Secure<br/>Pseudo-Random Number Generator"]
+        SOUT["Output: computationally<br/>indistinguishable from true random"]
         ENTROPY --> DRBG --> SOUT
     end
 ```
@@ -101,20 +101,23 @@ flowchart TD
 ```mermaid
 flowchart TD
     subgraph Impact ["💥 Consequences of Using java.util.Random for Security"]
-        I1["AES key → attacker recovers key → decrypts all past + future traffic"]
-        I2["Session token → attacker forges sessions → account takeover"]
-        I3["IV reuse in AES-GCM → nonce reuse attack → key recovered from two messages"]
-        I4["RSA key generation → weak primes → key factored in seconds"]
+        ROOT["Predictable seed → attacker reproduces all values"]
+        I1["AES key leaked → decrypts all traffic"]
+        I2["Session token forged → account takeover"]
+        I3["IV reuse in GCM → key recovered from 2 messages"]
+        I4["Weak RSA primes → key factored in seconds"]
+        ROOT --> I1 & I2 & I3 & I4
     end
 ```
 
 ### When to Use Which
 
 ```mermaid
-flowchart LR
-    SEC["java.security.SecureRandom\n→ ALL crypto:\nkeys, IVs, salts, nonces\ntokens, CSRF tokens, OTPs"]
-    WEAK["java.util.Random\n→ Non-security:\nsimulations, games\nshuffling playlists"]
-    MATH["Math.random()\n→ NEVER for security\n(same as Random, worse API)"]
+flowchart TD
+    WHICH["What kind of randomness do you need?"]
+    WHICH -->|"Cryptographic<br/>(keys, tokens, IVs, salts)"| SEC["✅ java.security.SecureRandom"]
+    WHICH -->|"Non-security<br/>(games, simulations)"| WEAK["⚠️ java.util.Random"]
+    WHICH -->|"Any context"| MATH["❌ Math.random() — never for security"]
 ```
 
 ---
@@ -136,7 +139,7 @@ flowchart TD
 
     subgraph Attack ["⚡ Attack — Unsalted Database"]
         STOLEN["Alice's stored hash: 5e884898da28..."]
-        LOOKUP[("Rainbow Table\nlookup")]
+        LOOKUP[("Rainbow Table<br/>lookup")]
         STOLEN --> LOOKUP --> FOUND["💥 'password' — instant!"]
     end
 ```
@@ -151,8 +154,8 @@ flowchart TD
         U2["User 2: salt=a0b2ea...  →  hash=f42c694b..."]
         U3["User 3: salt=437f0e...  →  hash=f58264a7..."]
         SAME --> U1 & U2 & U3
-        LOOKUP2[("Rainbow Table\nlookup")]
-        U1 & U2 & U3 --> LOOKUP2 --> NOTFOUND["✅ NOT FOUND\nAll three hashes are unique\nPrecomputed table is useless"]
+        LOOKUP2[("Rainbow Table<br/>lookup")]
+        U1 & U2 & U3 --> LOOKUP2 --> NOTFOUND["✅ NOT FOUND<br/>All three hashes are unique<br/>Precomputed table is useless"]
     end
 ```
 
@@ -160,8 +163,8 @@ flowchart TD
 
 ```mermaid
 flowchart LR
-    L1["Plain hash\n❌ Rainbow tables\ncrack instantly"]
-    L2["Salt + hash\n⚠️ No rainbow tables\nGPU brute force still fast\n(billions/sec SHA-256)"]
-    L3["Salt + PBKDF2 / bcrypt / Argon2\n✅ No rainbow tables\nBrute force impractical\n(thousands/sec at most)"]
+    L1["Plain hash<br/>❌ Rainbow tables<br/>crack instantly"]
+    L2["Salt + hash<br/>⚠️ No rainbow tables<br/>GPU brute force still fast<br/>(billions/sec SHA-256)"]
+    L3["Salt + PBKDF2 / bcrypt / Argon2<br/>✅ No rainbow tables<br/>Brute force impractical<br/>(thousands/sec at most)"]
     L1 -->|"add salt"| L2 -->|"add slow hash"| L3
 ```

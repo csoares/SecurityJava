@@ -37,26 +37,26 @@ flowchart TD
     subgraph Construction ["⚙️ HMAC(K, m) = H( (K ⊕ opad) ‖ H( (K ⊕ ipad) ‖ m ) )"]
         K["Secret Key K"]
         M["Message m"]
-        IPAD["K ⊕ ipad\n(inner padding)"]
-        OPAD["K ⊕ opad\n(outer padding)"]
+        IPAD["K ⊕ ipad<br/>(inner padding)"]
+        OPAD["K ⊕ opad<br/>(outer padding)"]
         H1["SHA-256( ipad_key ‖ message )"]
         H2["SHA-256( opad_key ‖ inner_hash )"]
-        TAG["HMAC Tag\n(32 bytes)"]
+        TAG["HMAC Tag<br/>(32 bytes)"]
         K --> IPAD --> H1
         M --> H1
         K --> OPAD --> H2
         H1 --> H2 --> TAG
     end
-    NOTE["Two-layer hash prevents length-extension attacks\nthat can break naive H(key ‖ message) constructions"]
+    NOTE["Two-layer hash prevents length-extension attacks<br/>that can break naive H(key ‖ message) constructions"]
 ```
 
 ### Authentication Spectrum
 
 ```mermaid
-flowchart LR
-    HS["🔍 Hash (SHA-256)\nNo key\nIntegrity only\nAnyone can forge"]
-    HM["🔑 HMAC\nShared secret key\nForgery requires the key\nIntegrity + Authentication"]
-    DS["✍️ Digital Signature\nPrivate key signs\nPublic key verifies\nIntegrity + Authentication\n+ Non-repudiation"]
+flowchart TD
+    HS["🔍 Hash (SHA-256)<br/>No key — Integrity only<br/>Anyone can recompute and forge"]
+    HM["🔑 HMAC<br/>Shared secret key<br/>Forgery requires the key<br/>Integrity + Authentication"]
+    DS["✍️ Digital Signature<br/>Private key signs, public key verifies<br/>Integrity + Authentication + Non-repudiation"]
     HS -->|"add symmetric key"| HM
     HM -->|"switch to asymmetric keys"| DS
 ```

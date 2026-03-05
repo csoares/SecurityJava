@@ -16,11 +16,11 @@ mvn exec:java -Dexec.mainClass="security.encryption.modes.CipherModesComparison"
 ```mermaid
 flowchart LR
     subgraph ECB ["❌ ECB — Electronic Code Book  (NEVER USE)"]
-        P1["Block 1\n'YELLOW SUB'"] --> AES1["AES"] --> C1["CipherBlock1"]
-        P2["Block 2\n'YELLOW SUB'"] --> AES2["AES"] --> C2["CipherBlock2"]
-        P3["Block 3\n'YELLOW SUB'"] --> AES3["AES"] --> C3["CipherBlock3"]
+        P1["Block 1<br/>'YELLOW SUB'"] --> AES1["AES"] --> C1["CipherBlock1"]
+        P2["Block 2<br/>'YELLOW SUB'"] --> AES2["AES"] --> C2["CipherBlock2"]
+        P3["Block 3<br/>'YELLOW SUB'"] --> AES3["AES"] --> C3["CipherBlock3"]
+        C1 & C2 & C3 --> PROB["⚠️ C1 == C2 == C3<br/>Identical input → identical output<br/>Patterns are visible to attackers!"]
     end
-    PROB["⚠️ C1 == C2 == C3\nIdentical input → identical output\nAn attacker can see repeated data and infer structure\nFamous example: encrypting a bitmap still shows the image"]
 ```
 
 ### CBC — Chains Blocks Together
@@ -28,14 +28,14 @@ flowchart LR
 ```mermaid
 flowchart LR
     subgraph CBC ["✅ CBC — Cipher Block Chaining"]
-        IV1["Random IV"] -->|"XOR ⊕"| XOR1[" "]
-        P4["Block 1\n'YELLOW SUB'"] --> XOR1 --> AES4["AES"] --> CC1["CipherBlock1"]
-        CC1 -->|"XOR ⊕"| XOR2[" "]
-        P5["Block 2\n'YELLOW SUB'"] --> XOR2 --> AES5["AES"] --> CC2["CipherBlock2"]
-        CC2 -->|"XOR ⊕"| XOR3[" "]
-        P6["Block 3\n'YELLOW SUB'"] --> XOR3 --> AES6["AES"] --> CC3["CipherBlock3"]
+        IV1["Random IV"] -->|"XOR ⊕"| XOR1["⊕"]
+        P4["Block 1<br/>'YELLOW SUB'"] --> XOR1 --> AES4["AES"] --> CC1["CipherBlock1"]
+        CC1 -->|"XOR ⊕"| XOR2["⊕"]
+        P5["Block 2<br/>'YELLOW SUB'"] --> XOR2 --> AES5["AES"] --> CC2["CipherBlock2"]
+        CC2 -->|"XOR ⊕"| XOR3["⊕"]
+        P6["Block 3<br/>'YELLOW SUB'"] --> XOR3 --> AES6["AES"] --> CC3["CipherBlock3"]
+        CC3 --> FIX["✅ CC1 ≠ CC2 ≠ CC3 even with identical plaintext<br/>Limitation: confidentiality only — no tamper detection"]
     end
-    FIX["✅ CC1 ≠ CC2 ≠ CC3 even though all plaintext blocks are identical\nEach block depends on all previous ciphertext\nLimitation: provides confidentiality only — tampering goes undetected"]
 ```
 
 ### GCM — Encryption + Authentication in One Pass
@@ -43,11 +43,11 @@ flowchart LR
 ```mermaid
 flowchart LR
     subgraph GCM ["🏆 GCM — Galois/Counter Mode  (RECOMMENDED)"]
-        NONCE["12-byte Nonce\n(unique per message)"] --> CTR["Counter Mode\nEncryption"]
+        NONCE["12-byte Nonce<br/>(unique per message)"] --> CTR["Counter Mode<br/>Encryption"]
         P7["Plaintext"] --> CTR --> CT7["Ciphertext"]
-        CT7 --> GHASH["GHASH\n(Galois field MAC)"] --> TAG["Auth Tag\n(16 bytes)"]
+        CT7 --> GHASH["GHASH<br/>(Galois field MAC)"] --> TAG["Auth Tag<br/>(16 bytes)"]
+        TAG --> BEST["Confidentiality + Integrity in ONE pass<br/>Tampering → AEADBadTagException on decrypt"]
     end
-    BEST["🏆 Confidentiality + Integrity in ONE pass\nNo separate HMAC step needed\nTampering → AEADBadTagException on decrypt\nCounter mode: no identical block problem (like ECB)"]
 ```
 
 ### Mode Comparison Summary
