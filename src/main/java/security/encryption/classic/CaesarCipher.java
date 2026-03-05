@@ -21,6 +21,8 @@ Security:
 Real-World Use:
 - ROT13 (rotation by 13) is still used for obfuscating spoilers, puzzle solutions, etc.
 - NOT secure for any real encryption needs
+
+    DIAGRAM: see README.md in this package for visual diagrams of this class.
  */
 
 public class CaesarCipher {

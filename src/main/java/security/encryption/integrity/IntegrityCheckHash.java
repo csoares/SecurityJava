@@ -7,6 +7,8 @@ import java.util.Arrays;
 This example uses the SHA-256 hash function to compute the hash of the original data and verifies it to ensure data integrity.
 
 Hash Function (SHA-256): Used for quick integrity checks but doesn't confirm data authenticity or the sender's identity.
+
+    DIAGRAM: see README.md in this package for visual diagrams of this class.
  */
 public class IntegrityCheckHash {
 

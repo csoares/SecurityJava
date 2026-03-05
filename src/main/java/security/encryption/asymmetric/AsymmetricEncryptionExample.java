@@ -28,7 +28,7 @@ Exception Handling:
 The methods include throws declarations for handling exceptions related to cryptographic operations.
 This Java program effectively demonstrates the use of RSA for asymmetric encryption and decryption, which is pivotal for securing communications over untrusted networks. It encapsulates the core concepts of key management, public key infrastructure (PKI), and the mechanics of RSA encryption and decryption processes. This example will be valuable in an educational context, especially in illustrating the differences between symmetric and asymmetric encryption.
 
-
+    DIAGRAM: see README.md in this package for visual diagrams of this class.
  */
 
 public class AsymmetricEncryptionExample {

@@ -25,6 +25,8 @@ Base64 Encoding: The encrypted data is encoded in Base64 to ensure that it consi
 Exception Handling: The encryption and decryption methods include throws declarations for handling all necessary exceptions related to cryptographic operations.
 
 This example provides a comprehensive introduction to implementing symmetric encryption in Java and can be a useful teaching aid in explaining concepts such as key management, initialization vectors, and the mechanics of block cipher modes like CBC.
+
+    DIAGRAM: see README.md in this package for visual diagrams of this class.
  */
 
 public class SymmetricEncryptionExample {

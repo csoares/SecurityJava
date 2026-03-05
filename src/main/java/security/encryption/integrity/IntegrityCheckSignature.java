@@ -5,12 +5,14 @@ import java.util.Base64;
 
 
 /*
+This example uses RSA for digital signatures which combines the use of a private key (to sign data)
+and a public key (to verify signatures), thereby validating both the integrity and the authenticity
+of the data.
 
-This example uses RSA for digital signatures which combines the use of a private key (to sign data) and a public key (to verify signatures), thereby validating both the integrity and the authenticity of the data.
+Digital Signatures (RSA with SHA-256): Provides both integrity and authenticity verification using
+a pair of cryptographic keys.
 
-Digital Signatures (RSA with SHA-256): Provides both integrity and authenticity verification using a pair of cryptographic keys.
-
-
+    DIAGRAM: see README.md in this package for visual diagrams of this class.
  */
 public class IntegrityCheckSignature {
 

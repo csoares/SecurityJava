@@ -35,6 +35,8 @@ Security:
 Real-World Use:
 - Basis for one-time pad (theoretically unbreakable if key is truly random and used once)
 - Influenced modern stream ciphers
+
+    DIAGRAM: see README.md in this package for visual diagrams of this class.
  */
 
 public class VigenereCipher {

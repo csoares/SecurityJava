@@ -23,6 +23,8 @@ import java.util.Base64;
  * Why hash first?
  *   RSA can only sign small payloads. Hashing reduces the file to a fixed 32-byte
  *   fingerprint, making the operation fast regardless of file size.
+ *
+ * DIAGRAM: see README.md in this package for visual diagrams of this class.
  */
 public class FileDigitalSignature {
 
