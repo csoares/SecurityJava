@@ -43,9 +43,11 @@ sequenceDiagram
 ### Why Eve Cannot Crack It
 
 ```mermaid
-%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 50, 'bottom': 10}}}}%%
 flowchart TD
-    subgraph Math ["🔢 The Discrete Logarithm Problem"]
+    subgraph Math
+        T_Math["🔢 The Discrete Logarithm Problem"]
+        T_Math ~~~ M1
         M1["Eve observes: g, p, A = g^a mod p, B = g^b mod p"]
         M2["To compute the shared secret, Eve needs: a or b"]
         M3["To find a: solve  g^a ≡ A  (mod p)  — this is the DLP"]
@@ -58,9 +60,11 @@ flowchart TD
 ### Critical Limitation — No Authentication
 
 ```mermaid
-%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 50, 'bottom': 10}}}}%%
 flowchart TD
-    subgraph MITM ["⚠️ Man-in-the-Middle Attack (DH alone is vulnerable)"]
+    subgraph MITM
+        T_MITM["⚠️ Man-in-the-Middle Attack (DH alone is vulnerable)"]
+        T_MITM ~~~ ALICE
         ALICE["Alice"]
         EVE["Eve (MITM)"]
         BOB["Bob"]
@@ -71,7 +75,9 @@ flowchart TD
         EVE --> NOTE["Eve holds two separate secrets:<br/>one with Alice, one with Bob<br/>Neither Alice nor Bob suspects!"]
     end
 
-    subgraph Fix ["✅ Fix: Combine DH with Digital Signatures"]
+    subgraph Fix
+        T_Fix["✅ Fix: Combine DH with Digital Signatures"]
+        T_Fix ~~~ F1
         F1["TLS: server signs its DH public key<br/>with its certificate private key"]
         F2["Client verifies the signature<br/>using the server's certificate"]
         F3["Certificate trusted because<br/>it is signed by a trusted CA"]
@@ -88,15 +94,19 @@ flowchart TD
 ### Classic DH vs Elliptic Curve DH
 
 ```mermaid
-%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 50, 'bottom': 10}}}}%%
 flowchart TD
-    subgraph DH ["Classic DH"]
+    subgraph DH
+        T_DH["Classic DH"]
+        T_DH ~~~ DH1
         DH1["Math: modular exponentiation<br/>g^a mod p"]
         DH2["2048-bit keys for 112-bit security<br/>(~256 byte keys)"]
         DH1 --- DH2
     end
 
-    subgraph ECDH ["Elliptic Curve DH (ECDH)"]
+    subgraph ECDH
+        T_ECDH["Elliptic Curve DH (ECDH)"]
+        T_ECDH ~~~ EC1
         EC1["Math: point multiplication on a curve<br/>a × G  (G = generator point)"]
         EC2["256-bit keys for 128-bit security<br/>(~32 byte keys  =  8× smaller)"]
         EC1 --- EC2
@@ -116,9 +126,11 @@ flowchart TD
 ### Forward Secrecy — Why Ephemeral Keys Matter
 
 ```mermaid
-%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 50, 'bottom': 10}}}}%%
 flowchart TD
-    subgraph FS ["🔒 Forward Secrecy with Ephemeral ECDH (ECDHE)"]
+    subgraph FS
+        T_FS["🔒 Forward Secrecy with Ephemeral ECDH (ECDHE)"]
+        T_FS ~~~ FS1
         FS1["TLS 1.3: generates a fresh ECDH key pair for EVERY session"]
         FS2["Session key exists only in RAM — deleted after handshake"]
         FS3["If server's long-term private key leaks in the future..."]

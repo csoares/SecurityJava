@@ -37,9 +37,11 @@ sequenceDiagram
 ### Vulnerable vs Secure Comparison
 
 ```mermaid
-%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 50, 'bottom': 10}}}}%%
 flowchart TD
-    subgraph Vulnerable ["❌ String.equals() — Early Exit"]
+    subgraph Vulnerable
+        T_Vulnerable["❌ String.equals() — Early Exit"]
+        T_Vulnerable ~~~ V1
         V1["Compare char 0: 'a' == 'a' ✅"]
         V2["Compare char 1: '3' == '3' ✅"]
         V3["Compare char 2: 'f' == 'X' ❌  return false immediately"]
@@ -47,7 +49,9 @@ flowchart TD
         V1 --> V2 --> V3 --> V4
     end
 
-    subgraph Secure ["✅ MessageDigest.isEqual() — Constant Time"]
+    subgraph Secure
+        T_Secure["✅ MessageDigest.isEqual() — Constant Time"]
+        T_Secure ~~~ S1
         S1["Compare ALL bytes with bitwise OR"]
         S2["Never exits early — always full length"]
         S3["Time is identical regardless of mismatch position"]
@@ -80,9 +84,11 @@ Cryptography depends on **unpredictability**. `java.util.Random` is seeded from 
 ### Weak PRNG vs CSPRNG
 
 ```mermaid
-%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 50, 'bottom': 10}}}}%%
 flowchart TD
-    subgraph Weak ["❌ java.util.Random — Predictable (seed guessable)"]
+    subgraph Weak
+        T_Weak["❌ java.util.Random — Predictable (seed guessable)"]
+        T_Weak ~~~ SEED
         SEED["Seed = System.currentTimeMillis()<br/>Attacker can guess: ±5 sec = ~10,000 tries"]
         LCG["Linear Congruential Generator<br/>next = (a × state + c) mod m<br/>Fully deterministic"]
         OUT["Output: 2423, 9550, 6394, ..."]
@@ -90,7 +96,9 @@ flowchart TD
         OUT --> ATKSEED["Attacker tries all seeds in the window"] --> ATKOUT["Reproduces exact sequence 💥"]
     end
 
-    subgraph Strong ["✅ java.security.SecureRandom — Unpredictable"]
+    subgraph Strong
+        T_Strong["✅ java.security.SecureRandom — Unpredictable"]
+        T_Strong ~~~ ENTROPY
         ENTROPY["OS Entropy Pool<br/>• CPU timing jitter<br/>• Hardware RNG<br/>• Network packet timings<br/>• Disk I/O timing"]
         DRBG["CSPRNG (DRBG)<br/>Cryptographically Secure<br/>Pseudo-Random Number Generator"]
         SOUT["Output: computationally<br/>indistinguishable from true random"]
@@ -101,9 +109,11 @@ flowchart TD
 ### What Breaks with Weak Randomness
 
 ```mermaid
-%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 50, 'bottom': 10}}}}%%
 flowchart TD
-    subgraph Impact ["💥 Consequences of Using java.util.Random for Security"]
+    subgraph Impact
+        T_Impact["💥 Consequences of Using java.util.Random for Security"]
+        T_Impact ~~~ ROOT
         ROOT["Predictable seed → attacker reproduces all values"]
         I1["AES key leaked → decrypts all traffic"]
         I2["Session token forged → account takeover"]
@@ -132,16 +142,20 @@ A **rainbow table** is a precomputed lookup: `hash → password`. An attacker wh
 ### Building and Using a Rainbow Table
 
 ```mermaid
-%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 50, 'bottom': 10}}}}%%
 flowchart TD
-    subgraph Build ["🏗️ Attacker builds Rainbow Table  (once, offline)"]
+    subgraph Build
+        T_Build["🏗️ Attacker builds Rainbow Table  (once, offline)"]
+        T_Build ~~~ PW1
         PW1["'password'"] -->|"SHA-256"| H1["5e884898..."]
         PW2["'123456'"]   -->|"SHA-256"| H2["8d969eef..."]
         PW3["'qwerty'"]   -->|"SHA-256"| H3["65e84be3..."]
         PW4["...billions of entries..."] --> H4["..."]
     end
 
-    subgraph Attack ["⚡ Attack — Unsalted Database"]
+    subgraph Attack
+        T_Attack["⚡ Attack — Unsalted Database"]
+        T_Attack ~~~ STOLEN
         STOLEN["Alice's stored hash: 5e884898da28..."]
         LOOKUP[("Rainbow Table<br/>lookup")]
         STOLEN --> LOOKUP --> FOUND["💥 'password' — instant!"]
@@ -151,9 +165,11 @@ flowchart TD
 ### Salt Defeats the Attack
 
 ```mermaid
-%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 50, 'bottom': 10}}}}%%
 flowchart TD
-    subgraph Defense ["🛡️ Salted Hashes — All Three Users Have 'password'"]
+    subgraph Defense
+        T_Defense["🛡️ Salted Hashes — All Three Users Have 'password'"]
+        T_Defense ~~~ SAME
         SAME["Three users, same password: 'password'"]
         U1["User 1: salt=5b5ea0...  →  hash=cc5ac0b7..."]
         U2["User 2: salt=a0b2ea...  →  hash=f42c694b..."]

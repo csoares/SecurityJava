@@ -14,9 +14,11 @@ mvn exec:java -Dexec.mainClass="security.encryption.modes.CipherModesComparison"
 ### ECB — The Broken Mode
 
 ```mermaid
-%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 50, 'bottom': 10}}}}%%
 flowchart TD
-    subgraph ECB ["❌ ECB — Electronic Code Book  (NEVER USE)"]
+    subgraph ECB
+        T_ECB["❌ ECB — Electronic Code Book  (NEVER USE)"]
+        T_ECB ~~~ P1
         P1["Block 1<br/>'YELLOW SUB'"] --> AES1["AES"] --> C1["CipherBlock1"]
         P2["Block 2<br/>'YELLOW SUB'"] --> AES2["AES"] --> C2["CipherBlock2"]
         P3["Block 3<br/>'YELLOW SUB'"] --> AES3["AES"] --> C3["CipherBlock3"]
@@ -27,9 +29,11 @@ flowchart TD
 ### CBC — Chains Blocks Together
 
 ```mermaid
-%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 50, 'bottom': 10}}}}%%
 flowchart TD
-    subgraph CBC ["✅ CBC — Cipher Block Chaining"]
+    subgraph CBC
+        T_CBC["✅ CBC — Cipher Block Chaining"]
+        T_CBC ~~~ IV1
         IV1["Random IV"] -->|"XOR ⊕"| XOR1["⊕"]
         P4["Block 1<br/>'YELLOW SUB'"] --> XOR1 --> AES4["AES"] --> CC1["CipherBlock1"]
         CC1 -->|"XOR ⊕"| XOR2["⊕"]
@@ -43,9 +47,11 @@ flowchart TD
 ### GCM — Encryption + Authentication in One Pass
 
 ```mermaid
-%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 50, 'bottom': 10}}}}%%
 flowchart TD
-    subgraph GCM ["🏆 GCM — Galois/Counter Mode  (RECOMMENDED)"]
+    subgraph GCM
+        T_GCM["🏆 GCM — Galois/Counter Mode  (RECOMMENDED)"]
+        T_GCM ~~~ NONCE
         NONCE["12-byte Nonce<br/>(unique per message)"] --> CTR["Counter Mode<br/>Encryption"]
         P7["Plaintext"] --> CTR --> CT7["Ciphertext"]
         CT7 --> GHASH["GHASH<br/>(Galois field MAC)"] --> TAG["Auth Tag<br/>(16 bytes)"]
@@ -56,9 +62,11 @@ flowchart TD
 ### Mode Comparison Summary
 
 ```mermaid
-%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 50, 'bottom': 10}}}}%%
 flowchart TD
-    subgraph Summary ["Mode Decision Guide"]
+    subgraph Summary
+        T_Summary["Mode Decision Guide"]
+        T_Summary ~~~ D1
         D1["Using ECB? → Stop. Replace with GCM immediately."]
         D2["Legacy system, encryption only? → CBC + separate HMAC"]
         D3["Building something new? → AES/GCM/NoPadding"]

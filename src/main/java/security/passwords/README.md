@@ -14,22 +14,28 @@ mvn exec:java -Dexec.mainClass="security.passwords.PasswordHashingExample"
 ### Stage Progression — Insecure to Secure
 
 ```mermaid
-%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 50, 'bottom': 10}}}}%%
 flowchart TD
-    subgraph Stage1 ["❌ Stage 1: Plain SHA-256  (NEVER do this)"]
+    subgraph Stage1
+        T_Stage1["❌ Stage 1: Plain SHA-256  (NEVER do this)"]
+        T_Stage1 ~~~ P1
         P1["'password'"] -->|"SHA-256"| H1["5e884898da28..."]
         H1 --> RT[("Rainbow Table<br/>billions of precomputed entries")]
         RT -->|"O(1) instant lookup"| CRACK1["💥 CRACKED"]
         CRACK1 --> NOTE1["Same password → same hash always<br/>GPU: billions of SHA-256/sec"]
     end
 
-    subgraph Stage2 ["⚠️ Stage 2: SHA-256 + Salt  (better, still fast)"]
+    subgraph Stage2
+        T_Stage2["⚠️ Stage 2: SHA-256 + Salt  (better, still fast)"]
+        T_Stage2 ~~~ SALT2
         SALT2["Random Salt<br/>(16 bytes, unique per user)"] --> MIX["SHA-256(salt ‖ password)"]
         P2["'password'"] --> MIX --> H2["unique hash per user"]
         H2 --> NOTE2["Rainbow tables: defeated ✅<br/>GPU brute force: still billions/sec ❌"]
     end
 
-    subgraph Stage3 ["✅ Stage 3: PBKDF2  (recommended)"]
+    subgraph Stage3
+        T_Stage3["✅ Stage 3: PBKDF2  (recommended)"]
+        T_Stage3 ~~~ SALT3
         SALT3["Unique Salt"] --> SLOW["310,000 rounds<br/>of HMAC-SHA256"]
         P3["'password'"] --> SLOW --> H3["derived key<br/>(256 bits)"]
         H3 --> NOTE3["Each guess: 310,000 HMAC operations<br/>GPU: billions/sec → thousands/sec ✅"]
@@ -41,9 +47,11 @@ flowchart TD
 ### Why SHA-256 Is Wrong for Passwords
 
 ```mermaid
-%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 50, 'bottom': 10}}}}%%
 flowchart TD
-    subgraph Rates ["⚡ Cracking Speed on 1 GPU"]
+    subgraph Rates
+        T_Rates["⚡ Cracking Speed on 1 GPU"]
+        T_Rates ~~~ R1
         R1["SHA-256: ~10 billion/sec ❌"]
         R2["PBKDF2 310k: ~10,000/sec ⚠️"]
         R3["bcrypt cost=12: ~5,000/sec ✅"]
@@ -81,9 +89,11 @@ sequenceDiagram
 ### Algorithm Comparison
 
 ```mermaid
-%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 50, 'bottom': 10}}}}%%
 flowchart TD
-    subgraph Algorithms ["Algorithm Comparison"]
+    subgraph Algorithms
+        T_Algorithms["Algorithm Comparison"]
+        T_Algorithms ~~~ A1
         A1["PBKDF2WithHmacSHA256<br/>✅ Java built-in (no extra library)<br/>✅ FIPS-compliant<br/>⚠️ Not memory-hard — GPU-friendly"]
         A2["bcrypt<br/>✅ Widely adopted, battle-tested<br/>✅ Automatic work factor<br/>⚠️ Limited to 72-byte passwords"]
         A3["Argon2id<br/>✅ Memory-hard — GPU/ASIC resistant<br/>✅ 2024 OWASP first choice<br/>✅ Configurable memory + time cost"]

@@ -14,9 +14,11 @@ mvn exec:java -Dexec.mainClass="security.ecc.ECCSignatureExample"
 ### Sign and Verify Flow
 
 ```mermaid
-%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 50, 'bottom': 10}}}}%%
 flowchart TD
-    subgraph Sign ["✍️ Signing  (private key — signer only)"]
+    subgraph Sign
+        T_Sign["✍️ Signing  (private key — signer only)"]
+        T_Sign ~~~ MSG
         MSG["Message<br/>'Transfer 100 shares of ACME Corp'"]
         HASH["SHA-256 Hash<br/>(32 bytes)"]
         RND["Random nonce k<br/>(different every time — CRITICAL)"]
@@ -27,7 +29,9 @@ flowchart TD
         SIG --> WARN["⚠️ If k is ever reused<br/>→ private key is mathematically recovered!<br/>Real case: PS3 master key stolen this way in 2010"]
     end
 
-    subgraph Verify ["🔍 Verification  (public key — anyone can do this)"]
+    subgraph Verify
+        T_Verify["🔍 Verification  (public key — anyone can do this)"]
+        T_Verify ~~~ MSG2
         MSG2["Received Message"]
         SIG2["Received Signature (r, s)"]
         HASH2["SHA-256 Hash"]
@@ -43,9 +47,11 @@ flowchart TD
 ### RSA vs ECDSA Key Size Comparison
 
 ```mermaid
-%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 50, 'bottom': 10}}}}%%
 flowchart TD
-    subgraph RSA ["RSA-2048"]
+    subgraph RSA
+        T_RSA["RSA-2048"]
+        T_RSA ~~~ R1
         R1["Private key: ~1217 bytes"]
         R2["Public key:  ~294 bytes"]
         R3["Signature:   ~256 bytes"]
@@ -53,7 +59,9 @@ flowchart TD
         R1 --- R2 --- R3 --- R4
     end
 
-    subgraph ECC ["ECDSA P-256"]
+    subgraph ECC
+        T_ECC["ECDSA P-256"]
+        T_ECC ~~~ E1
         E1["Private key: ~67 bytes"]
         E2["Public key:  ~91 bytes"]
         E3["Signature:   ~64–70 bytes"]
@@ -67,9 +75,11 @@ flowchart TD
 ### Real-World Uses
 
 ```mermaid
-%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 50, 'bottom': 10}}}}%%
 flowchart TD
-    subgraph Uses ["🌍 Where ECDSA / ECC Is Used"]
+    subgraph Uses
+        T_Uses["🌍 Where ECDSA / ECC Is Used"]
+        T_Uses ~~~ U1
         U1["Bitcoin / Ethereum — secp256k1 curve, signs every transaction"]
         U2["TLS 1.3 — ECDSA certificates are smaller and faster than RSA"]
         U3["JWT ES256 — compact signed API tokens"]
@@ -83,9 +93,11 @@ flowchart TD
 ### ECC vs RSA — The Core Difference
 
 ```mermaid
-%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 50, 'bottom': 10}}}}%%
 flowchart TD
-    subgraph Hardness ["Hard Problems That Provide Security"]
+    subgraph Hardness
+        T_Hardness["Hard Problems That Provide Security"]
+        T_Hardness ~~~ RSA_H
         RSA_H["RSA — Integer Factorisation<br/>Given n = p × q, find p and q<br/>Hard at 2048+ bits"]
         ECC_H["ECC — Elliptic Curve Discrete Log (ECDLP)<br/>Given P = k × G, find k<br/>Harder per bit — 256-bit ECC ≈ 3072-bit RSA"]
         RSA_H --- ECC_H

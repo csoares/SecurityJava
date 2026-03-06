@@ -22,9 +22,11 @@ mvn exec:java -Dexec.mainClass="security.encryption.integrity.FileDigitalSignatu
 ### Avalanche Effect
 
 ```mermaid
-%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 50, 'bottom': 10}}}}%%
 flowchart TD
-    subgraph Avalanche ["⚡ Avalanche Effect — tiny change, huge difference"]
+    subgraph Avalanche
+        T_Avalanche["⚡ Avalanche Effect — tiny change, huge difference"]
+        T_Avalanche ~~~ D1
         D1["'Hello, this is a sample text!'"]
         D2["'Hello, this is a sample TEXT!'<br/>← one character changed"]
         H1["b94d27b9934d3e08...  (SHA-256)"]
@@ -50,9 +52,11 @@ flowchart LR
 ### What a Hash Does NOT Prove
 
 ```mermaid
-%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 50, 'bottom': 10}}}}%%
 flowchart TD
-    subgraph Limits ["⚠️ Limitations of Plain Hashing"]
+    subgraph Limits
+        T_Limits["⚠️ Limitations of Plain Hashing"]
+        T_Limits ~~~ L1
         L1["❌ Does NOT prove WHO sent the data"]
         L2["❌ Attacker can modify data AND recompute a valid hash"]
         L3["✅ Only proves the data matches the hash — nothing more"]
@@ -91,14 +95,18 @@ sequenceDiagram
 ### Under the Hood — SHA256withRSA
 
 ```mermaid
-%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 50, 'bottom': 10}}}}%%
 flowchart TD
-    subgraph Sign ["Signing"]
+    subgraph Sign
+        T_Sign["Signing"]
+        T_Sign ~~~ DATA
         DATA["Data bytes"] -->|"SHA-256"| HASH["Hash (32 bytes)"]
         HASH -->|"RSA-encrypt<br/>with PRIVATE key"| SIG["Signature<br/>(256 bytes)"]
     end
 
-    subgraph Verify ["Verification"]
+    subgraph Verify
+        T_Verify["Verification"]
+        T_Verify ~~~ SIG2
         SIG2["Signature"] -->|"RSA-decrypt<br/>with PUBLIC key"| HASH2["Original Hash"]
         DATA2["Received Data"] -->|"SHA-256"| HASH3["Recomputed Hash"]
         HASH2 & HASH3 -->|"compare"| RESULT{"Equal?"}
@@ -127,9 +135,11 @@ flowchart TD
 ### Signing a File
 
 ```mermaid
-%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 50, 'bottom': 10}}}}%%
 flowchart TD
-    subgraph Sign ["✍️ Signing  (Sender)"]
+    subgraph Sign
+        T_Sign["✍️ Signing  (Sender)"]
+        T_Sign ~~~ FILE
         FILE["📄 document.txt"]
         HASH["SHA-256 Hash<br/>(32 bytes fixed — any file size)"]
         SIG["🔏 signature.sig<br/>(256 bytes)"]
@@ -142,9 +152,11 @@ flowchart TD
 ### Verifying a File
 
 ```mermaid
-%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 50, 'bottom': 10}}}}%%
 flowchart TD
-    subgraph Verify ["🔍 Verification  (Receiver)"]
+    subgraph Verify
+        T_Verify["🔍 Verification  (Receiver)"]
+        T_Verify ~~~ FILE2
         FILE2["📄 document.txt<br/>(received)"]
         SIG2["🔏 signature.sig"]
         HASH2["Recomputed SHA-256"]

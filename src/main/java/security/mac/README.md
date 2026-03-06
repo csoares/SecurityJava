@@ -33,9 +33,11 @@ sequenceDiagram
 ### HMAC Construction — Why It's Secure
 
 ```mermaid
-%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 50, 'bottom': 10}}}}%%
 flowchart TD
-    subgraph Construction ["⚙️ HMAC — Two-Layer Hash Construction"]
+    subgraph Construction
+        T_Construction["⚙️ HMAC — Two-Layer Hash Construction"]
+        T_Construction ~~~ K
         K["Secret Key K"]
         M["Message m"]
         IPAD["K ⊕ ipad<br/>(inner padding)"]
@@ -65,16 +67,20 @@ flowchart TD
 ### Constant-Time Comparison — Why It Matters
 
 ```mermaid
-%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 50, 'bottom': 10}}}}%%
 flowchart TD
-    subgraph Vulnerable ["❌ tag1.equals(tag2)"]
+    subgraph Vulnerable
+        T_Vulnerable["❌ tag1.equals(tag2)"]
+        T_Vulnerable ~~~ V1
         V1["Exits early on first mismatch"]
         V2["Timing reveals how many bytes matched"]
         V3["Timing attack can recover the expected tag bit by bit"]
         V1 --> V2 --> V3
     end
 
-    subgraph Secure ["✅ MessageDigest.isEqual(a, b)"]
+    subgraph Secure
+        T_Secure["✅ MessageDigest.isEqual(a, b)"]
+        T_Secure ~~~ S1
         S1["Always checks ALL bytes"]
         S2["Time is constant regardless of mismatch position"]
         S3["No exploitable timing signal"]

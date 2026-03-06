@@ -40,9 +40,11 @@ flowchart TD
 ### Why Intermediate CAs Exist
 
 ```mermaid
-%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 50, 'bottom': 10}}}}%%
 flowchart TD
-    subgraph Why ["❓ Why Not Root CA → Server Directly?"]
+    subgraph Why
+        T_Why["❓ Why Not Root CA → Server Directly?"]
+        T_Why ~~~ W1
         W1["Root CA private key kept OFFLINE — extremely high security"]
         W2["Intermediate CA kept ONLINE to issue certificates daily"]
         W3["If Intermediate CA is compromised:<br/>Revoke that intermediate only<br/>Root CA and other intermediates unaffected"]
@@ -54,9 +56,11 @@ flowchart TD
 ### Tamper Detection — Demonstrated in Code
 
 ```mermaid
-%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 50, 'bottom': 10}}}}%%
 flowchart TD
-    subgraph TamperDemo ["🚨 Tamper Detection"]
+    subgraph TamperDemo
+        T_TamperDemo["🚨 Tamper Detection"]
+        T_TamperDemo ~~~ TC1
         TC1["serverCert.verify(rootCert.getPublicKey())"]
         TC2["❌ SignatureException — server cert was NOT signed by Root CA"]
         TC3["It was signed by Intermediate CA's private key"]
@@ -92,9 +96,11 @@ sequenceDiagram
 ### What an X.509 Certificate Contains
 
 ```mermaid
-%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 50, 'bottom': 10}}}}%%
 flowchart TD
-    subgraph CertFields ["📄 X.509 Certificate Fields"]
+    subgraph CertFields
+        T_CertFields["📄 X.509 Certificate Fields"]
+        T_CertFields ~~~ F1
         F1["Subject DN: who this certificate identifies<br/>e.g. CN=www.example.com, O=Example Corp, C=US"]
         F2["Issuer DN: who signed this certificate<br/>e.g. CN=Example Intermediate CA"]
         F3["Public Key: the subject's RSA or EC public key"]
