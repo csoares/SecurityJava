@@ -84,8 +84,8 @@ flowchart TD
         SEED["Seed = System.currentTimeMillis()<br/>(attacker can guess: ±5 sec = ~10,000 tries)"]
         LCG["Linear Congruential Generator<br/>next = (a × current + c) mod m<br/>Fully deterministic formula"]
         OUT["Output: 2423, 9550, 6394, ..."]
-        ATKSEED["Attacker tries all seeds in the window"] --> ATKOUT["Reproduces exact sequence 💥"]
         SEED --> LCG --> OUT
+        OUT --> ATKSEED["Attacker tries all seeds in the window"] --> ATKOUT["Reproduces exact sequence 💥"]
     end
 
     subgraph Strong ["✅ java.security.SecureRandom — Unpredictable"]

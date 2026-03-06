@@ -46,8 +46,8 @@ flowchart TD
         M --> H1
         K --> OPAD --> H2
         H1 --> H2 --> TAG
+        TAG --> NOTE["Two-layer hash prevents length-extension attacks<br/>that can break naive H(key ‖ message) constructions"]
     end
-    NOTE["Two-layer hash prevents length-extension attacks<br/>that can break naive H(key ‖ message) constructions"]
 ```
 
 ### Authentication Spectrum

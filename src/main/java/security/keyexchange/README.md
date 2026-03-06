@@ -66,7 +66,7 @@ flowchart TD
         EVE -->|"sends E1 = g^e (pretending to be Alice)"| BOB
         BOB -->|"sends B = g^b"| EVE
         EVE -->|"sends E2 = g^e (pretending to be Bob)"| ALICE
-        NOTE["Eve shares one secret with Alice, a different one with Bob<br/>Both Alice and Bob think they talk to each other — they don't!"]
+        EVE --> NOTE["Eve shares one secret with Alice, a different one with Bob<br/>Both Alice and Bob think they talk to each other — they don't!"]
     end
 
     subgraph Fix ["✅ Fix: Combine DH with Digital Signatures"]
@@ -75,6 +75,8 @@ flowchart TD
         F3["Certificate is trusted because it is signed by a trusted CA"]
         F1 --> F2 --> F3
     end
+
+    NOTE --> F1
 ```
 
 ---
@@ -88,11 +90,13 @@ flowchart LR
     subgraph DH ["Classic DH"]
         DH1["Math: modular exponentiation<br/>g^a mod p"]
         DH2["2048-bit keys for 112-bit security<br/>(~256 byte keys)"]
+        DH1 --- DH2
     end
 
     subgraph ECDH ["Elliptic Curve DH (ECDH)"]
         EC1["Math: point multiplication on a curve<br/>a × G  (G = generator point)"]
         EC2["256-bit keys for 128-bit security<br/>(~32 byte keys  =  8× smaller)"]
+        EC1 --- EC2
     end
 
     DH -->|"same idea<br/>better maths"| ECDH

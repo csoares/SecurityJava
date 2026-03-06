@@ -55,9 +55,10 @@ flowchart LR
 ```mermaid
 flowchart TD
     subgraph Summary ["Mode Decision Guide"]
-        D1["Using ECB anywhere? → Stop. Replace with GCM immediately."]
-        D2["Need encryption only (legacy system)?  → CBC  with separate HMAC"]
-        D3["Building something new?  → AES/GCM/NoPadding  (preferred)"]
-        D4["Need to detect tampering automatically?  → GCM  (auth tag does it)"]
+        D1["Using ECB? → Stop. Replace with GCM immediately."]
+        D2["Legacy system, encryption only? → CBC + separate HMAC"]
+        D3["Building something new? → AES/GCM/NoPadding"]
+        D4["Need tamper detection? → GCM auth tag does it automatically"]
+        D1 --> D2 --> D3 --> D4
     end
 ```

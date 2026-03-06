@@ -23,7 +23,7 @@ flowchart TD
         MSG -->|"SHA-256"| HASH
         HASH -->|"ECDSA sign<br/>(private key + k)"| SIG
         RND --> SIG
-        WARN["⚠️ If k is reused even once → private key is mathematically recovered!<br/>(This is exactly how the PS3 master key was stolen in 2010)"]
+        SIG --> WARN["⚠️ If k is reused even once → private key is mathematically recovered!<br/>(This is exactly how the PS3 master key was stolen in 2010)"]
     end
 
     subgraph Verify ["🔍 Verification  (public key — anyone can do this)"]
@@ -48,6 +48,7 @@ flowchart LR
         R2["Public key:  ~294 bytes"]
         R3["Signature:   ~256 bytes"]
         R4["Security:    ~112-bit"]
+        R1 --- R2 --- R3 --- R4
     end
 
     subgraph ECC ["ECDSA P-256"]
@@ -55,6 +56,7 @@ flowchart LR
         E2["Public key:  ~91 bytes"]
         E3["Signature:   ~64–70 bytes"]
         E4["Security:    ~128-bit  (MORE secure!)"]
+        E1 --- E2 --- E3 --- E4
     end
 
     RSA -->|"8× smaller keys<br/>stronger security"| ECC
@@ -71,6 +73,7 @@ flowchart TD
         U4["SSH — ecdsa-sha2-nistp256 key type"]
         U5["Android APK signing — every app on the Play Store"]
         U6["Signal / WhatsApp / iMessage — ECDH key exchange"]
+        U1 --- U2 --- U3 --- U4 --- U5 --- U6
     end
 ```
 

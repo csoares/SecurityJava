@@ -36,14 +36,14 @@ sequenceDiagram
 ### CBC Mode — How Blocks Are Chained
 
 ```mermaid
-flowchart LR
+flowchart TD
     subgraph CBCChain ["🔗 CBC — Cipher Block Chaining (why IV matters)"]
-        IV["Random IV<br/>(16 bytes)"] -->|"XOR ⊕"| XOR1["⊕"]
-        P1["Plaintext<br/>Block 1"] --> XOR1 --> AES1["AES"] --> C1["Cipher<br/>Block 1"]
-        C1 -->|"XOR ⊕"| XOR2["⊕"]
-        P2["Plaintext<br/>Block 2"] --> XOR2 --> AES2["AES"] --> C2["Cipher<br/>Block 2"]
-        C2 -->|"XOR ⊕"| XOR3["⊕"]
-        P3["Plaintext<br/>Block 3"] --> XOR3 --> AES3["AES"] --> C3["Cipher<br/>Block 3"]
+        IV["Random IV (16 bytes)"] --> XOR1["⊕ XOR"]
+        P1["Plaintext Block 1"] --> XOR1 --> AES1["AES"] --> C1["Cipher Block 1"]
+        C1 --> XOR2["⊕ XOR"]
+        P2["Plaintext Block 2"] --> XOR2 --> AES2["AES"] --> C2["Cipher Block 2"]
+        C2 --> XOR3["⊕ XOR"]
+        P3["Plaintext Block 3"] --> XOR3 --> AES3["AES"] --> C3["Cipher Block 3"]
         C3 --> NOTE["Each block depends on all previous blocks<br/>Identical plaintext blocks → different ciphertext"]
     end
 ```
@@ -73,4 +73,7 @@ flowchart TD
         B3["Safe for transmission in JSON, HTTP, email"]
         B1 --> B2 --> B3
     end
-```
+
+    KF3 --- IV1
+    IV4 --- B1
+

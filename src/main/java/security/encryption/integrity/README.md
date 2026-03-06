@@ -55,6 +55,7 @@ flowchart TD
         L2["❌ Attacker can modify data AND recompute a valid hash"]
         L3["✅ Only proves the data matches the hash — nothing more"]
         L4["→ Use HMAC to add a secret key<br/>→ Use Digital Signatures to add identity"]
+        L1 --> L2 --> L3 --> L4
     end
 ```
 
@@ -101,7 +102,9 @@ flowchart LR
         RESULT -->|"yes"| VALID["✅ Valid"]
         RESULT -->|"no"| INVALID["❌ Invalid"]
     end
-```
+
+    SIG --> SIG2
+
 
 ### What a Valid Signature Proves
 

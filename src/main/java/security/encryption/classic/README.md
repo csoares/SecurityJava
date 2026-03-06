@@ -33,7 +33,9 @@ flowchart LR
         PL2["Plaintext<br/>'H E L L O'"]
         CT2 --> OP2 --> PL2
     end
-```
+
+    CT -.->|"decrypt ↓"| CT2
+
 
 ### Alphabet Shift
 
@@ -54,7 +56,7 @@ flowchart TD
         BF3["Shift  3: Hello World ...  ✅  Found it!"]
         BF4["Shift  4: Gdkkn Vnqkc ...  ❌"]
         BF5["...24 more tries at most"]
-        BF1 --> BF2 --> BF3
+        BF1 --> BF2 --> BF3 --> BF4 --> BF5
     end
 
     subgraph FreqAnalysis ["📊 Frequency Analysis (no key needed)"]
@@ -63,7 +65,9 @@ flowchart TD
         FA3["H − E = 3  →  shift is probably 3!"]
         FA1 --> FA2 --> FA3
     end
-```
+
+    BF5 -.->|"or use"| FA1
+
 
 ---
 
@@ -90,7 +94,9 @@ flowchart TD
         L5["O + shift  4 → S"]
         L1 --- L2 --- L3 --- L4 --- L5
     end
-```
+
+    KR3 --> L1
+
 
 ### Caesar vs Vigenère
 
@@ -119,4 +125,6 @@ flowchart TD
         IC3["Vigenère      IC between 0.038 – 0.067<br/>(closer to 0.067 = shorter key)"]
         IC1 --- IC2 --- IC3
     end
-```
+
+    K4 --> IC1
+
