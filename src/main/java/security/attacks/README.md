@@ -37,7 +37,7 @@ sequenceDiagram
 ### Vulnerable vs Secure Comparison
 
 ```mermaid
-flowchart LR
+flowchart TD
     subgraph Vulnerable ["❌ String.equals() — Early Exit"]
         V1["Compare char 0: 'a' == 'a' ✅"]
         V2["Compare char 1: '3' == '3' ✅"]
@@ -80,7 +80,7 @@ Cryptography depends on **unpredictability**. `java.util.Random` is seeded from 
 
 ```mermaid
 flowchart TD
-    subgraph Weak ["❌ java.util.Random — Predictable"]
+    subgraph Weak ["❌ java.util.Random — Predictable (seed guessable)"]
         SEED["Seed = System.currentTimeMillis()<br/>Attacker can guess: ±5 sec = ~10,000 tries"]
         LCG["Linear Congruential Generator<br/>next = (a × state + c) mod m<br/>Fully deterministic"]
         OUT["Output: 2423, 9550, 6394, ..."]

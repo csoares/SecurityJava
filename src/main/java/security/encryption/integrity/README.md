@@ -22,7 +22,7 @@ mvn exec:java -Dexec.mainClass="security.encryption.integrity.FileDigitalSignatu
 ### Avalanche Effect
 
 ```mermaid
-flowchart LR
+flowchart TD
     subgraph Avalanche ["⚡ Avalanche Effect — tiny change, huge difference"]
         D1["'Hello, this is a sample text!'"]
         D2["'Hello, this is a sample TEXT!'<br/>← one character changed"]
@@ -89,7 +89,7 @@ sequenceDiagram
 ### Under the Hood — SHA256withRSA
 
 ```mermaid
-flowchart LR
+flowchart TD
     subgraph Sign ["Signing"]
         DATA["Data bytes"] -->|"SHA-256"| HASH["Hash (32 bytes)"]
         HASH -->|"RSA-encrypt<br/>with PRIVATE key"| SIG["Signature<br/>(256 bytes)"]
@@ -124,7 +124,7 @@ flowchart TD
 ### Signing a File
 
 ```mermaid
-flowchart LR
+flowchart TD
     subgraph Sign ["✍️ Signing  (Sender)"]
         FILE["📄 document.txt"]
         HASH["SHA-256 Hash<br/>(32 bytes fixed — any file size)"]
@@ -138,7 +138,7 @@ flowchart LR
 ### Verifying a File
 
 ```mermaid
-flowchart LR
+flowchart TD
     subgraph Verify ["🔍 Verification  (Receiver)"]
         FILE2["📄 document.txt<br/>(received)"]
         SIG2["🔏 signature.sig"]

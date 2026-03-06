@@ -64,7 +64,7 @@ flowchart TD
 ### Constant-Time Comparison — Why It Matters
 
 ```mermaid
-flowchart LR
+flowchart TD
     subgraph Vulnerable ["❌ tag1.equals(tag2)"]
         V1["Exits early on first mismatch"]
         V2["Timing reveals how many bytes matched"]

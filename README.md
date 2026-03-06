@@ -221,7 +221,7 @@ sequenceDiagram
 > **Proving data hasn't changed — and who sent it.** Hashes verify integrity. Digital signatures add authentication: only the holder of the private key could have produced the signature.
 
 ```mermaid
-flowchart LR
+flowchart TD
     subgraph Hash ["🔍 Hash — Integrity Only"]
         M1["Message"] -->|"SHA-256"| H1["Hash"]
         H1 -->|"Compare"| V1{"Match?"}
@@ -275,7 +275,7 @@ sequenceDiagram
 ```
 
 ```mermaid
-flowchart LR
+flowchart TD
     subgraph DH ["Classic Diffie-Hellman"]
         DH1["~256-byte keys<br/>2048-bit security<br/>Slower handshake"]
     end
@@ -374,7 +374,7 @@ flowchart TD
 > **Smaller keys, same security.** ECC is an alternative mathematical foundation for public-key cryptography. The same operations (signing, key exchange) work with dramatically smaller keys.
 
 ```mermaid
-flowchart LR
+flowchart TD
     subgraph RSA ["RSA-2048"]
         RSAP["Private key: ~1200 bytes<br/>Public key: ~294 bytes<br/>Security: ~112 bits<br/>Math: modular exponentiation"]
     end
@@ -480,7 +480,7 @@ sequenceDiagram
 ### Weak Randomness
 
 ```mermaid
-flowchart LR
+flowchart TD
     subgraph Weak ["❌ java.util.Random"]
         SEED["Seed = currentTimeMillis()"] --> LCG["Linear Congruential<br/>Generator"] --> OUT1["'Random' output"]
         OUT1 -.->|"attacker sees output<br/>guesses seed window"| SAME["Reproduces identical output<br/>💥 Token forged"]

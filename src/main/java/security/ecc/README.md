@@ -42,7 +42,7 @@ flowchart TD
 ### RSA vs ECDSA Key Size Comparison
 
 ```mermaid
-flowchart LR
+flowchart TD
     subgraph RSA ["RSA-2048"]
         R1["Private key: ~1217 bytes"]
         R2["Public key:  ~294 bytes"]

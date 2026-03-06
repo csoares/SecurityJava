@@ -53,7 +53,7 @@ flowchart TD
 ### Tamper Detection — Demonstrated in Code
 
 ```mermaid
-flowchart LR
+flowchart TD
     subgraph TamperDemo ["🚨 Tamper Detection"]
         TC1["serverCert.verify(rootCert.getPublicKey())"]
         TC2["❌ SignatureException — server cert was NOT signed by Root CA"]

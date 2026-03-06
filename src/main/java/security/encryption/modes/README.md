@@ -14,7 +14,7 @@ mvn exec:java -Dexec.mainClass="security.encryption.modes.CipherModesComparison"
 ### ECB — The Broken Mode
 
 ```mermaid
-flowchart LR
+flowchart TD
     subgraph ECB ["❌ ECB — Electronic Code Book  (NEVER USE)"]
         P1["Block 1<br/>'YELLOW SUB'"] --> AES1["AES"] --> C1["CipherBlock1"]
         P2["Block 2<br/>'YELLOW SUB'"] --> AES2["AES"] --> C2["CipherBlock2"]
@@ -26,7 +26,7 @@ flowchart LR
 ### CBC — Chains Blocks Together
 
 ```mermaid
-flowchart LR
+flowchart TD
     subgraph CBC ["✅ CBC — Cipher Block Chaining"]
         IV1["Random IV"] -->|"XOR ⊕"| XOR1["⊕"]
         P4["Block 1<br/>'YELLOW SUB'"] --> XOR1 --> AES4["AES"] --> CC1["CipherBlock1"]
@@ -41,7 +41,7 @@ flowchart LR
 ### GCM — Encryption + Authentication in One Pass
 
 ```mermaid
-flowchart LR
+flowchart TD
     subgraph GCM ["🏆 GCM — Galois/Counter Mode  (RECOMMENDED)"]
         NONCE["12-byte Nonce<br/>(unique per message)"] --> CTR["Counter Mode<br/>Encryption"]
         P7["Plaintext"] --> CTR --> CT7["Ciphertext"]

@@ -17,7 +17,7 @@ Each letter is shifted by a fixed number of positions in the alphabet. Named aft
 ### Encrypt / Decrypt
 
 ```mermaid
-flowchart LR
+flowchart TD
     subgraph Encrypt ["🔒 Encryption  (key = shift 3)"]
         PL["Plaintext: 'H E L L O'"]
         OP["+3 to each letter's position"]
@@ -38,7 +38,7 @@ flowchart LR
 ### Alphabet Shift
 
 ```mermaid
-flowchart LR
+flowchart TD
     subgraph Alphabet ["Alphabet shift — shift = 3, wraps around at Z"]
         A1["A→D"] --- B1["B→E"] --- C1["C→F"] --- D1["..."] --- W1["W→Z"] --- X1["X→A"] --- Y1["Y→B"] --- Z1["Z→C"]
     end

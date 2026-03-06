@@ -86,7 +86,7 @@ flowchart TD
 ### Classic DH vs Elliptic Curve DH
 
 ```mermaid
-flowchart LR
+flowchart TD
     subgraph DH ["Classic DH"]
         DH1["Math: modular exponentiation<br/>g^a mod p"]
         DH2["2048-bit keys for 112-bit security<br/>(~256 byte keys)"]
