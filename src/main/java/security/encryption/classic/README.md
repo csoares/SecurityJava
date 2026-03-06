@@ -34,8 +34,8 @@ flowchart LR
         CT2 --> OP2 --> PL2
     end
 
-    CT -.->|"decrypt ↓"| CT2
-
+    CT -.->|"decrypt"| CT2
+```
 
 ### Alphabet Shift
 
@@ -67,7 +67,7 @@ flowchart TD
     end
 
     BF5 -.->|"or use"| FA1
-
+```
 
 ---
 
@@ -96,7 +96,7 @@ flowchart TD
     end
 
     KR3 --> L1
-
+```
 
 ### Caesar vs Vigenère
 
@@ -127,4 +127,4 @@ flowchart TD
     end
 
     K4 --> IC1
-
+```

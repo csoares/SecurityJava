@@ -104,7 +104,7 @@ flowchart LR
     end
 
     SIG --> SIG2
-
+```
 
 ### What a Valid Signature Proves
 
