@@ -43,6 +43,7 @@ sequenceDiagram
 ### Why Eve Cannot Crack It
 
 ```mermaid
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
 flowchart TD
     subgraph Math ["🔢 The Discrete Logarithm Problem"]
         M1["Eve observes: g, p, A = g^a mod p, B = g^b mod p"]
@@ -57,6 +58,7 @@ flowchart TD
 ### Critical Limitation — No Authentication
 
 ```mermaid
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
 flowchart TD
     subgraph MITM ["⚠️ Man-in-the-Middle Attack (DH alone is vulnerable)"]
         ALICE["Alice"]
@@ -86,6 +88,7 @@ flowchart TD
 ### Classic DH vs Elliptic Curve DH
 
 ```mermaid
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
 flowchart TD
     subgraph DH ["Classic DH"]
         DH1["Math: modular exponentiation<br/>g^a mod p"]
@@ -113,6 +116,7 @@ flowchart TD
 ### Forward Secrecy — Why Ephemeral Keys Matter
 
 ```mermaid
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
 flowchart TD
     subgraph FS ["🔒 Forward Secrecy with Ephemeral ECDH (ECDHE)"]
         FS1["TLS 1.3: generates a fresh ECDH key pair for EVERY session"]

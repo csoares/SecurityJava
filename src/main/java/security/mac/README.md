@@ -33,6 +33,7 @@ sequenceDiagram
 ### HMAC Construction — Why It's Secure
 
 ```mermaid
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
 flowchart TD
     subgraph Construction ["⚙️ HMAC — Two-Layer Hash Construction"]
         K["Secret Key K"]
@@ -64,6 +65,7 @@ flowchart TD
 ### Constant-Time Comparison — Why It Matters
 
 ```mermaid
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
 flowchart TD
     subgraph Vulnerable ["❌ tag1.equals(tag2)"]
         V1["Exits early on first mismatch"]

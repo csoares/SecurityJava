@@ -14,6 +14,7 @@ mvn exec:java -Dexec.mainClass="security.ecc.ECCSignatureExample"
 ### Sign and Verify Flow
 
 ```mermaid
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
 flowchart TD
     subgraph Sign ["✍️ Signing  (private key — signer only)"]
         MSG["Message<br/>'Transfer 100 shares of ACME Corp'"]
@@ -42,6 +43,7 @@ flowchart TD
 ### RSA vs ECDSA Key Size Comparison
 
 ```mermaid
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
 flowchart TD
     subgraph RSA ["RSA-2048"]
         R1["Private key: ~1217 bytes"]
@@ -65,6 +67,7 @@ flowchart TD
 ### Real-World Uses
 
 ```mermaid
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
 flowchart TD
     subgraph Uses ["🌍 Where ECDSA / ECC Is Used"]
         U1["Bitcoin / Ethereum — secp256k1 curve, signs every transaction"]
@@ -80,6 +83,7 @@ flowchart TD
 ### ECC vs RSA — The Core Difference
 
 ```mermaid
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
 flowchart TD
     subgraph Hardness ["Hard Problems That Provide Security"]
         RSA_H["RSA — Integer Factorisation<br/>Given n = p × q, find p and q<br/>Hard at 2048+ bits"]

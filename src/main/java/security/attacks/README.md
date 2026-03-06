@@ -37,6 +37,7 @@ sequenceDiagram
 ### Vulnerable vs Secure Comparison
 
 ```mermaid
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
 flowchart TD
     subgraph Vulnerable ["❌ String.equals() — Early Exit"]
         V1["Compare char 0: 'a' == 'a' ✅"]
@@ -79,6 +80,7 @@ Cryptography depends on **unpredictability**. `java.util.Random` is seeded from 
 ### Weak PRNG vs CSPRNG
 
 ```mermaid
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
 flowchart TD
     subgraph Weak ["❌ java.util.Random — Predictable (seed guessable)"]
         SEED["Seed = System.currentTimeMillis()<br/>Attacker can guess: ±5 sec = ~10,000 tries"]
@@ -99,6 +101,7 @@ flowchart TD
 ### What Breaks with Weak Randomness
 
 ```mermaid
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
 flowchart TD
     subgraph Impact ["💥 Consequences of Using java.util.Random for Security"]
         ROOT["Predictable seed → attacker reproduces all values"]
@@ -129,6 +132,7 @@ A **rainbow table** is a precomputed lookup: `hash → password`. An attacker wh
 ### Building and Using a Rainbow Table
 
 ```mermaid
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
 flowchart TD
     subgraph Build ["🏗️ Attacker builds Rainbow Table  (once, offline)"]
         PW1["'password'"] -->|"SHA-256"| H1["5e884898..."]
@@ -147,6 +151,7 @@ flowchart TD
 ### Salt Defeats the Attack
 
 ```mermaid
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
 flowchart TD
     subgraph Defense ["🛡️ Salted Hashes — All Three Users Have 'password'"]
         SAME["Three users, same password: 'password'"]

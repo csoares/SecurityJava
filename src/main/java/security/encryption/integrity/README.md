@@ -22,6 +22,7 @@ mvn exec:java -Dexec.mainClass="security.encryption.integrity.FileDigitalSignatu
 ### Avalanche Effect
 
 ```mermaid
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
 flowchart TD
     subgraph Avalanche ["⚡ Avalanche Effect — tiny change, huge difference"]
         D1["'Hello, this is a sample text!'"]
@@ -49,6 +50,7 @@ flowchart LR
 ### What a Hash Does NOT Prove
 
 ```mermaid
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
 flowchart TD
     subgraph Limits ["⚠️ Limitations of Plain Hashing"]
         L1["❌ Does NOT prove WHO sent the data"]
@@ -89,6 +91,7 @@ sequenceDiagram
 ### Under the Hood — SHA256withRSA
 
 ```mermaid
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
 flowchart TD
     subgraph Sign ["Signing"]
         DATA["Data bytes"] -->|"SHA-256"| HASH["Hash (32 bytes)"]
@@ -124,6 +127,7 @@ flowchart TD
 ### Signing a File
 
 ```mermaid
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
 flowchart TD
     subgraph Sign ["✍️ Signing  (Sender)"]
         FILE["📄 document.txt"]
@@ -138,6 +142,7 @@ flowchart TD
 ### Verifying a File
 
 ```mermaid
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
 flowchart TD
     subgraph Verify ["🔍 Verification  (Receiver)"]
         FILE2["📄 document.txt<br/>(received)"]

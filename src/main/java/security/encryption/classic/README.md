@@ -17,6 +17,7 @@ Each letter is shifted by a fixed number of positions in the alphabet. Named aft
 ### Encrypt / Decrypt
 
 ```mermaid
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
 flowchart TD
     subgraph Encrypt ["🔒 Encryption  (key = shift 3)"]
         PL["Plaintext: 'H E L L O'"]
@@ -38,6 +39,7 @@ flowchart TD
 ### Alphabet Shift
 
 ```mermaid
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
 flowchart TD
     subgraph Alphabet ["Alphabet shift — shift = 3, wraps around at Z"]
         A1["A→D"] --- B1["B→E"] --- C1["C→F"] --- D1["..."] --- W1["W→Z"] --- X1["X→A"] --- Y1["Y→B"] --- Z1["Z→C"]
@@ -47,6 +49,7 @@ flowchart TD
 ### Why It Fails — Attacks
 
 ```mermaid
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
 flowchart TD
     subgraph BruteForce ["⚠️ Brute Force Attack — only 25 keys to try"]
         BF1["Shift  1: Jgnnq Yqtnf ...  ❌"]
@@ -76,6 +79,7 @@ Uses a repeating keyword instead of one fixed shift — applying a different Cae
 ### How the Keyword Works
 
 ```mermaid
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
 flowchart TD
     subgraph KeyRepeat ["🔑 Keyword repeats to match plaintext length"]
         KR1["Plaintext: H E L L O W O R L D"]
@@ -108,6 +112,7 @@ flowchart LR
 ### How It Is Broken — Kasiski Examination
 
 ```mermaid
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
 flowchart TD
     subgraph Kasiski ["⚠️ Kasiski Examination"]
         K1["Find repeated trigrams in ciphertext<br/>e.g. 'XYZ' appears at positions 5 and 20"]

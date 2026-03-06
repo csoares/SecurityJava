@@ -14,6 +14,7 @@ mvn exec:java -Dexec.mainClass="security.encryption.asymmetric.AsymmetricEncrypt
 ### Key Generation and Encryption Flow
 
 ```mermaid
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
 flowchart TD
     subgraph KeyGen ["1️⃣ Key Generation — RSA-2048"]
         KPG["KeyPairGenerator<br/>(RSA, 2048 bits)"]

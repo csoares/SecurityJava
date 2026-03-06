@@ -54,6 +54,7 @@ flowchart TD
 Each package has its own `README.md` with rendered Mermaid diagrams and concept explanations.
 
 ```mermaid
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
 graph LR
     subgraph security
         subgraph encryption
@@ -156,6 +157,7 @@ sequenceDiagram
 > **Same algorithm, very different security.** AES encrypts 16 bytes at a time. The *mode* determines how blocks are connected. The wrong mode leaks structure even when each block is encrypted.
 
 ```mermaid
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
 flowchart TD
     subgraph ECB ["❌ ECB — Electronic Code Book (INSECURE)"]
         direction LR
@@ -221,6 +223,7 @@ sequenceDiagram
 > **Proving data hasn't changed — and who sent it.** Hashes verify integrity. Digital signatures add authentication: only the holder of the private key could have produced the signature.
 
 ```mermaid
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
 flowchart TD
     subgraph Hash ["🔍 Hash — Integrity Only"]
         M1["Message"] -->|"SHA-256"| H1["Hash"]
@@ -275,6 +278,7 @@ sequenceDiagram
 ```
 
 ```mermaid
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
 flowchart TD
     subgraph DH ["Classic Diffie-Hellman"]
         DH1["~256-byte keys<br/>2048-bit security<br/>Slower handshake"]
@@ -336,6 +340,7 @@ sequenceDiagram
 > **Why you can't just hash passwords.** Passwords need to be stored so you can verify them at login — but never retrievable. The solution has evolved from plain hashes to deliberately slow, salted algorithms.
 
 ```mermaid
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
 flowchart TD
     subgraph Stage1 ["❌ Stage 1: Plain SHA-256 (INSECURE)"]
         P1["password"] -->|"SHA-256"| H1["5e884898..."]
@@ -374,6 +379,7 @@ flowchart TD
 > **Smaller keys, same security.** ECC is an alternative mathematical foundation for public-key cryptography. The same operations (signing, key exchange) work with dramatically smaller keys.
 
 ```mermaid
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
 flowchart TD
     subgraph RSA ["RSA-2048"]
         RSAP["Private key: ~1200 bytes<br/>Public key: ~294 bytes<br/>Security: ~112 bits<br/>Math: modular exponentiation"]
@@ -480,6 +486,7 @@ sequenceDiagram
 ### Weak Randomness
 
 ```mermaid
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
 flowchart TD
     subgraph Weak ["❌ java.util.Random"]
         SEED["Seed = currentTimeMillis()"] --> LCG["Linear Congruential<br/>Generator"] --> OUT1["'Random' output"]
@@ -494,6 +501,7 @@ flowchart TD
 ### Rainbow Table Attack
 
 ```mermaid
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
 flowchart TD
     subgraph Build ["Attacker builds rainbow table (once, offline)"]
         PW1["password"] -->|SHA-256| H1["5e884898..."]

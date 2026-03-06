@@ -40,6 +40,7 @@ flowchart TD
 ### Why Intermediate CAs Exist
 
 ```mermaid
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
 flowchart TD
     subgraph Why ["❓ Why Not Root CA → Server Directly?"]
         W1["Root CA private key kept OFFLINE — extremely high security"]
@@ -53,6 +54,7 @@ flowchart TD
 ### Tamper Detection — Demonstrated in Code
 
 ```mermaid
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
 flowchart TD
     subgraph TamperDemo ["🚨 Tamper Detection"]
         TC1["serverCert.verify(rootCert.getPublicKey())"]
@@ -90,6 +92,7 @@ sequenceDiagram
 ### What an X.509 Certificate Contains
 
 ```mermaid
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
 flowchart TD
     subgraph CertFields ["📄 X.509 Certificate Fields"]
         F1["Subject DN: who this certificate identifies<br/>e.g. CN=www.example.com, O=Example Corp, C=US"]

@@ -14,6 +14,7 @@ mvn exec:java -Dexec.mainClass="security.passwords.PasswordHashingExample"
 ### Stage Progression — Insecure to Secure
 
 ```mermaid
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
 flowchart TD
     subgraph Stage1 ["❌ Stage 1: Plain SHA-256  (NEVER do this)"]
         P1["'password'"] -->|"SHA-256"| H1["5e884898da28..."]
@@ -40,6 +41,7 @@ flowchart TD
 ### Why SHA-256 Is Wrong for Passwords
 
 ```mermaid
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
 flowchart TD
     subgraph Rates ["⚡ Cracking Speed on 1 GPU"]
         R1["SHA-256: ~10 billion/sec ❌"]
@@ -79,6 +81,7 @@ sequenceDiagram
 ### Algorithm Comparison
 
 ```mermaid
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
 flowchart TD
     subgraph Algorithms ["Algorithm Comparison"]
         A1["PBKDF2WithHmacSHA256<br/>✅ Java built-in (no extra library)<br/>✅ FIPS-compliant<br/>⚠️ Not memory-hard — GPU-friendly"]

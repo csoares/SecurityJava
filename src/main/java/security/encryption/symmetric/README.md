@@ -36,6 +36,7 @@ sequenceDiagram
 ### CBC Mode — How Blocks Are Chained
 
 ```mermaid
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
 flowchart TD
     subgraph CBCChain ["🔗 CBC — Cipher Block Chaining (why IV matters)"]
         IV["Random IV (16 bytes)"] --> XOR1["⊕ XOR"]
@@ -51,6 +52,7 @@ flowchart TD
 ### Key and IV Facts
 
 ```mermaid
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
 flowchart TD
     subgraph KeyFacts ["🔑 AES Key Facts"]
         KF1["256-bit key = 32 random bytes"]
