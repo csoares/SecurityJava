@@ -67,7 +67,7 @@ flowchart TD
     R3["Session tokens, API keys, CSRF tokens"]
     R4["Any secret byte sequence"]
     RULE --> R1 & R2 & R3 & R4
-    R1 & R2 & R3 & R4 --> NEVER["⚠️ Never use == / .equals() / Arrays.equals() for secrets<br/>Even a remote HTTP timing difference is measurable"]
+    R1 & R2 & R3 & R4 --> NEVER["⚠️ Never use .equals() or Arrays.equals() for secrets<br/>Even HTTP response timing differences are measurable"]
 ```
 
 ---
@@ -81,8 +81,8 @@ Cryptography depends on **unpredictability**. `java.util.Random` is seeded from 
 ```mermaid
 flowchart TD
     subgraph Weak ["❌ java.util.Random — Predictable"]
-        SEED["Seed = System.currentTimeMillis()<br/>(attacker can guess: ±5 sec = ~10,000 tries)"]
-        LCG["Linear Congruential Generator<br/>next = (a × current + c) mod m<br/>Fully deterministic formula"]
+        SEED["Seed = System.currentTimeMillis()<br/>Attacker can guess: ±5 sec = ~10,000 tries"]
+        LCG["Linear Congruential Generator<br/>next = (a × state + c) mod m<br/>Fully deterministic"]
         OUT["Output: 2423, 9550, 6394, ..."]
         SEED --> LCG --> OUT
         OUT --> ATKSEED["Attacker tries all seeds in the window"] --> ATKOUT["Reproduces exact sequence 💥"]

@@ -34,7 +34,7 @@ flowchart LR
         P5["Block 2<br/>'YELLOW SUB'"] --> XOR2 --> AES5["AES"] --> CC2["CipherBlock2"]
         CC2 -->|"XOR ⊕"| XOR3["⊕"]
         P6["Block 3<br/>'YELLOW SUB'"] --> XOR3 --> AES6["AES"] --> CC3["CipherBlock3"]
-        CC3 --> FIX["✅ CC1 ≠ CC2 ≠ CC3 even with identical plaintext<br/>Limitation: confidentiality only — no tamper detection"]
+        CC3 --> FIX["✅ CC1 ≠ CC2 ≠ CC3 even with identical plaintext<br/>⚠️ Confidentiality only — no tamper detection"]
     end
 ```
 
@@ -46,7 +46,7 @@ flowchart LR
         NONCE["12-byte Nonce<br/>(unique per message)"] --> CTR["Counter Mode<br/>Encryption"]
         P7["Plaintext"] --> CTR --> CT7["Ciphertext"]
         CT7 --> GHASH["GHASH<br/>(Galois field MAC)"] --> TAG["Auth Tag<br/>(16 bytes)"]
-        TAG --> BEST["Confidentiality + Integrity in ONE pass<br/>Tampering → AEADBadTagException on decrypt"]
+        TAG --> BEST["Confidentiality + Integrity in ONE pass<br/>Tampering → AEADBadTagException"]
     end
 ```
 

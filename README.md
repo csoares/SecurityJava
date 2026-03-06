@@ -300,9 +300,9 @@ flowchart LR
 
 ```mermaid
 flowchart TD
-    H["🔍 Hash — SHA-256(message)<br/>No key · Anyone can forge · Integrity only"]
-    HM["🔑 HMAC — HMAC-SHA256(key, message)<br/>Shared secret key · Forgery requires the key<br/>Integrity + Authentication"]
-    DS["✍️ Digital Signature — Sign(privateKey, message)<br/>Asymmetric key pair · Only private key can sign<br/>Integrity + Authentication + Non-repudiation"]
+    H["🔍 Hash — SHA-256<br/>No key · Integrity only<br/>Anyone can recompute and forge"]
+    HM["🔑 HMAC — HMAC-SHA256(key, msg)<br/>Shared secret key<br/>Integrity + Authentication"]
+    DS["✍️ Digital Signature<br/>Private key signs, public key verifies<br/>Integrity + Authentication + Non-repudiation"]
     H -->|"Add symmetric key"| HM
     HM -->|"Switch to asymmetric keys"| DS
 ```
@@ -482,8 +482,8 @@ sequenceDiagram
 ```mermaid
 flowchart LR
     subgraph Weak ["❌ java.util.Random"]
-        SEED["Seed = currentTimeMillis()"] --> LCG["Linear Congruential<br/>Generator"] --> OUT1["'Random' numbers"]
-        GUESS["Attacker guesses seed<br/>±5 second window<br/>= ~10,000 tries"] --> LCG2["Same LCG"] --> SAME["Identical output<br/>💥 Token forged"]
+        SEED["Seed = currentTimeMillis()"] --> LCG["Linear Congruential<br/>Generator"] --> OUT1["'Random' output"]
+        OUT1 -.->|"attacker sees output<br/>guesses seed window"| SAME["Reproduces identical output<br/>💥 Token forged"]
     end
 
     subgraph Strong ["✅ java.security.SecureRandom"]

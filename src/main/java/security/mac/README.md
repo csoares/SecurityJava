@@ -34,7 +34,7 @@ sequenceDiagram
 
 ```mermaid
 flowchart TD
-    subgraph Construction ["⚙️ HMAC(K, m) = H( (K ⊕ opad) ‖ H( (K ⊕ ipad) ‖ m ) )"]
+    subgraph Construction ["⚙️ HMAC — Two-Layer Hash Construction"]
         K["Secret Key K"]
         M["Message m"]
         IPAD["K ⊕ ipad<br/>(inner padding)"]

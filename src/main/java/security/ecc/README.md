@@ -23,7 +23,7 @@ flowchart TD
         MSG -->|"SHA-256"| HASH
         HASH -->|"ECDSA sign<br/>(private key + k)"| SIG
         RND --> SIG
-        SIG --> WARN["⚠️ If k is reused even once → private key is mathematically recovered!<br/>(This is exactly how the PS3 master key was stolen in 2010)"]
+        SIG --> WARN["⚠️ If k is ever reused<br/>→ private key is mathematically recovered!<br/>Real case: PS3 master key stolen this way in 2010"]
     end
 
     subgraph Verify ["🔍 Verification  (public key — anyone can do this)"]

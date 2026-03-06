@@ -63,16 +63,16 @@ flowchart TD
         EVE["Eve (MITM)"]
         BOB["Bob"]
         ALICE -->|"sends A = g^a"| EVE
-        EVE -->|"sends E1 = g^e (pretending to be Alice)"| BOB
+        EVE -->|"sends E1=g^e (fake Alice key)"| BOB
         BOB -->|"sends B = g^b"| EVE
-        EVE -->|"sends E2 = g^e (pretending to be Bob)"| ALICE
-        EVE --> NOTE["Eve shares one secret with Alice, a different one with Bob<br/>Both Alice and Bob think they talk to each other — they don't!"]
+        EVE -->|"sends E2=g^e (fake Bob key)"| ALICE
+        EVE --> NOTE["Eve holds two separate secrets:<br/>one with Alice, one with Bob<br/>Neither Alice nor Bob suspects!"]
     end
 
     subgraph Fix ["✅ Fix: Combine DH with Digital Signatures"]
-        F1["In TLS: server signs its DH public key with its certificate private key"]
-        F2["Client verifies the signature using the server's certificate"]
-        F3["Certificate is trusted because it is signed by a trusted CA"]
+        F1["TLS: server signs its DH public key<br/>with its certificate private key"]
+        F2["Client verifies the signature<br/>using the server's certificate"]
+        F3["Certificate trusted because<br/>it is signed by a trusted CA"]
         F1 --> F2 --> F3
     end
 

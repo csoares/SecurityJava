@@ -25,7 +25,7 @@ mvn exec:java -Dexec.mainClass="security.encryption.integrity.FileDigitalSignatu
 flowchart LR
     subgraph Avalanche ["⚡ Avalanche Effect — tiny change, huge difference"]
         D1["'Hello, this is a sample text!'"]
-        D2["'Hello, this is a sample TEXT!'  ← one character changed"]
+        D2["'Hello, this is a sample TEXT!'<br/>← one character changed"]
         H1["b94d27b9934d3e08...  (SHA-256)"]
         H2["9f86d081884c7d65...  (SHA-256)"]
         D1 -->|"SHA-256"| H1
@@ -127,7 +127,7 @@ flowchart TD
 flowchart LR
     subgraph Sign ["✍️ Signing  (Sender)"]
         FILE["📄 document.txt"]
-        HASH["SHA-256 Hash<br/>(32 bytes — fixed size regardless of file size)"]
+        HASH["SHA-256 Hash<br/>(32 bytes fixed — any file size)"]
         SIG["🔏 signature.sig<br/>(256 bytes)"]
         FILE -->|"computeSHA256()"| HASH
         HASH -->|"RSA sign<br/>(private key)"| SIG

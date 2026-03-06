@@ -19,18 +19,16 @@ Each letter is shifted by a fixed number of positions in the alphabet. Named aft
 ```mermaid
 flowchart LR
     subgraph Encrypt ["🔒 Encryption  (key = shift 3)"]
-        direction LR
-        PL["Plaintext<br/>'H E L L O'"]
-        OP["+3 to each<br/>letter's position"]
-        CT["Ciphertext<br/>'K H O O R'"]
+        PL["Plaintext: 'H E L L O'"]
+        OP["+3 to each letter's position"]
+        CT["Ciphertext: 'K H O O R'"]
         PL --> OP --> CT
     end
 
     subgraph Decrypt ["🔓 Decryption  (same key, reversed)"]
-        direction LR
-        CT2["Ciphertext<br/>'K H O O R'"]
-        OP2["-3 from each<br/>letter's position"]
-        PL2["Plaintext<br/>'H E L L O'"]
+        CT2["Ciphertext: 'K H O O R'"]
+        OP2["-3 from each letter's position"]
+        PL2["Plaintext: 'H E L L O'"]
         CT2 --> OP2 --> PL2
     end
 
@@ -80,18 +78,18 @@ Uses a repeating keyword instead of one fixed shift — applying a different Cae
 ```mermaid
 flowchart TD
     subgraph KeyRepeat ["🔑 Keyword repeats to match plaintext length"]
-        KR1["Plaintext : H  E  L  L  O     W  O  R  L  D"]
-        KR2["Keyword   : K  E  Y  K  E     Y  K  E  Y  K   ← 'KEY' repeated"]
-        KR3["Shifts    :10  4 24 10  4    24 10  4 24 10"]
+        KR1["Plaintext: H E L L O W O R L D"]
+        KR2["Keyword:   K E Y K E Y K E Y K<br/>(KEY repeating)"]
+        KR3["Shifts:    10 4 24 10 4 24 10 4 24 10"]
         KR1 --- KR2 --- KR3
     end
 
     subgraph PerLetter ["🔤 Each letter uses a different Caesar shift"]
-        L1["H + shift 10 → R"]
-        L2["E + shift  4 → I"]
-        L3["L + shift 24 → J"]
-        L4["L + shift 10 → V"]
-        L5["O + shift  4 → S"]
+        L1["H + shift 10 = R"]
+        L2["E + shift  4 = I"]
+        L3["L + shift 24 = J"]
+        L4["L + shift 10 = V"]
+        L5["O + shift  4 = S"]
         L1 --- L2 --- L3 --- L4 --- L5
     end
 
@@ -115,7 +113,7 @@ flowchart TD
         K1["Find repeated trigrams in ciphertext<br/>e.g. 'XYZ' appears at positions 5 and 20"]
         K2["Distance = 20 − 5 = 15"]
         K3["Key length divides 15: factors are 1, 3, 5, 15"]
-        K4["Try key length = 3 → split ciphertext into 3 Caesar streams<br/>→ frequency-analyse each one separately"]
+        K4["Try key length = 3<br/>Split ciphertext into 3 Caesar streams<br/>Frequency-analyse each stream separately"]
         K1 --> K2 --> K3 --> K4
     end
 

@@ -15,9 +15,9 @@ mvn exec:java -Dexec.mainClass="security.pki.CertificateChainExample"
 
 ```mermaid
 flowchart TD
-    ROOT["🏛️ Root CA<br/>CN=Example Root CA<br/>Self-signed  (subject == issuer)<br/>Stored in browser / OS trust store<br/>Private key kept OFFLINE in a vault"]
-    INT["🏢 Intermediate CA<br/>CN=Example Intermediate CA<br/>Issuer = Root CA<br/>Signed by Root CA's private key<br/>Kept ONLINE to sign site certificates"]
-    SERVER["🌐 Server Certificate<br/>CN=www.example.com<br/>Issuer = Intermediate CA<br/>Contains server's RSA/EC public key<br/>Presented during TLS handshake"]
+    ROOT["🏛️ Root CA<br/>Self-signed · Stored in OS/browser trust store<br/>Private key kept OFFLINE in a vault"]
+    INT["🏢 Intermediate CA<br/>Signed by Root CA<br/>Kept ONLINE to sign site certificates"]
+    SERVER["🌐 Server Certificate<br/>CN=www.example.com<br/>Contains server's public key<br/>Presented during TLS handshake"]
 
     ROOT -->|"signs"| INT
     INT  -->|"signs"| SERVER
@@ -44,8 +44,8 @@ flowchart TD
     subgraph Why ["❓ Why Not Root CA → Server Directly?"]
         W1["Root CA private key kept OFFLINE — extremely high security"]
         W2["Intermediate CA kept ONLINE to issue certificates daily"]
-        W3["If Intermediate CA is compromised:<br/>Revoke that intermediate — Root CA is unaffected<br/>Millions of other intermediates still valid"]
-        W4["If Root CA were used directly and compromised:<br/>Entire PKI collapses — all certificates untrusted"]
+        W3["If Intermediate CA is compromised:<br/>Revoke that intermediate only<br/>Root CA and other intermediates unaffected"]
+        W4["If Root CA were compromised directly:<br/>Entire PKI collapses — all certificates untrusted"]
         W1 --> W2 --> W3 --> W4
     end
 ```

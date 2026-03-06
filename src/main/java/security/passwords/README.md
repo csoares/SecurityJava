@@ -19,19 +19,19 @@ flowchart TD
         P1["'password'"] -->|"SHA-256"| H1["5e884898da28..."]
         H1 --> RT[("Rainbow Table<br/>billions of precomputed entries")]
         RT -->|"O(1) instant lookup"| CRACK1["💥 CRACKED"]
-        CRACK1 --> NOTE1["Same password → same hash always<br/>Two users with 'password' exposed at once<br/>GPU: billions of SHA-256/sec"]
+        CRACK1 --> NOTE1["Same password → same hash always<br/>GPU: billions of SHA-256/sec"]
     end
 
     subgraph Stage2 ["⚠️ Stage 2: SHA-256 + Salt  (better, still fast)"]
         SALT2["Random Salt<br/>(16 bytes, unique per user)"] --> MIX["SHA-256(salt ‖ password)"]
         P2["'password'"] --> MIX --> H2["unique hash per user"]
-        H2 --> NOTE2["Rainbow tables: defeated ✅<br/>GPU brute force: still billions/sec ❌<br/>SHA-256 is designed to be fast — bad for passwords"]
+        H2 --> NOTE2["Rainbow tables: defeated ✅<br/>GPU brute force: still billions/sec ❌"]
     end
 
     subgraph Stage3 ["✅ Stage 3: PBKDF2  (recommended)"]
         SALT3["Unique Salt"] --> SLOW["310,000 rounds<br/>of HMAC-SHA256"]
         P3["'password'"] --> SLOW --> H3["derived key<br/>(256 bits)"]
-        H3 --> NOTE3["Each guess costs 310,000 HMAC operations<br/>GPU drops from billions/sec to thousands/sec<br/>Factor of ~10^6 harder to crack"]
+        H3 --> NOTE3["Each guess: 310,000 HMAC operations<br/>GPU: billions/sec → thousands/sec ✅"]
     end
 
     Stage1 --> Stage2 --> Stage3

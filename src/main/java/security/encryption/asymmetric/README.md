@@ -57,9 +57,9 @@ In practice (TLS, PGP, Signal), RSA and AES are always combined:
 ```mermaid
 flowchart LR
     H1["1. Generate random AES-256 key"] --> H2["2. RSA-encrypt the AES key<br/>with recipient's public key"]
-    H2 --> H3["3. AES-encrypt the actual data"]
+    H2 --> H3["3. AES-encrypt the data"]
     H3 --> H4["4. Send: encrypted AES key<br/>+ AES ciphertext"]
-    H4 --> H5["5. Recipient: RSA-decrypt AES key<br/>→ AES-decrypt the data"]
+    H4 --> H5["5. Recipient: RSA-decrypt AES key<br/>then AES-decrypt the data"]
 ```
 
 > RSA handles the key exchange problem. AES handles the speed problem. Together they solve both.
