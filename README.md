@@ -54,7 +54,7 @@ flowchart TD
 Each package has its own `README.md` with rendered Mermaid diagrams and concept explanations.
 
 ```mermaid
-%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 50, 'bottom': 10}}}}%%
 graph LR
     subgraph security
         subgraph encryption
@@ -157,9 +157,11 @@ sequenceDiagram
 > **Same algorithm, very different security.** AES encrypts 16 bytes at a time. The *mode* determines how blocks are connected. The wrong mode leaks structure even when each block is encrypted.
 
 ```mermaid
-%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 50, 'bottom': 10}}}}%%
 flowchart TD
-    subgraph ECB ["❌ ECB — Electronic Code Book (INSECURE)"]
+    subgraph ECB
+        T_ECB["❌ ECB — Electronic Code Book (INSECURE)"]
+        T_ECB ~~~ P1
         direction LR
         P1["Block 1<br/>'YELLOW SUB'"] --> E1["AES"] --> C1["Block 1 out"]
         P2["Block 2<br/>'YELLOW SUB'"] --> E2["AES"] --> C2["Block 2 out"]
@@ -167,7 +169,9 @@ flowchart TD
         C1 & C2 & C3 --> Note1["⚠️ C1 == C2 == C3<br/>Identical input → identical output<br/>Patterns are visible!"]
     end
 
-    subgraph CBC ["✅ CBC — Cipher Block Chaining"]
+    subgraph CBC
+        T_CBC["✅ CBC — Cipher Block Chaining"]
+        T_CBC ~~~ IV
         IV["Random IV"] --> XOR1["XOR"]
         P4["Block 1"] --> XOR1 --> AES1["AES"] --> CC1["C1"]
         CC1 --> XOR2["XOR"]
@@ -176,7 +180,9 @@ flowchart TD
         P6["Block 3"] --> XOR3 --> AES3["AES"] --> CC3["C3"]
     end
 
-    subgraph GCM ["🏆 GCM — Galois/Counter Mode (BEST)"]
+    subgraph GCM
+        T_GCM["🏆 GCM — Galois/Counter Mode (BEST)"]
+        T_GCM ~~~ P7
         P7["Plaintext"] --> AES4["AES-CTR"] --> CT["Ciphertext"]
         CT --> GHASH["GHASH"] --> TAG["Auth Tag"]
         TAG --> Note2["Encrypts AND authenticates<br/>Tampering detected automatically"]
@@ -223,20 +229,26 @@ sequenceDiagram
 > **Proving data hasn't changed — and who sent it.** Hashes verify integrity. Digital signatures add authentication: only the holder of the private key could have produced the signature.
 
 ```mermaid
-%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 50, 'bottom': 10}}}}%%
 flowchart TD
-    subgraph Hash ["🔍 Hash — Integrity Only"]
+    subgraph Hash
+        T_Hash["🔍 Hash — Integrity Only"]
+        T_Hash ~~~ M1
         M1["Message"] -->|"SHA-256"| H1["Hash"]
         H1 -->|"Compare"| V1{"Match?"}
     end
 
-    subgraph Sig ["✍️ Digital Signature — Integrity + Authenticity"]
+    subgraph Sig
+        T_Sig["✍️ Digital Signature — Integrity + Authenticity"]
+        T_Sig ~~~ M2
         M2["Message"] -->|"SHA-256"| H2["Hash"]
         H2 -->|"RSA sign<br/>(private key)"| S["Signature"]
         S -->|"RSA verify<br/>(public key)"| V2{"Valid?"}
     end
 
-    subgraph File ["📄 File Signing"]
+    subgraph File
+        T_File["📄 File Signing"]
+        T_File ~~~ F
         F["File"] --> FS["Sign file<br/>(private key)"]
         FS --> SIG["signature.sig"]
         F2["File (received)"] --> FV["Verify<br/>(public key)"]
@@ -278,12 +290,16 @@ sequenceDiagram
 ```
 
 ```mermaid
-%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 50, 'bottom': 10}}}}%%
 flowchart TD
-    subgraph DH ["Classic Diffie-Hellman"]
+    subgraph DH
+        T_DH["Classic Diffie-Hellman"]
+        T_DH ~~~ DH1
         DH1["~256-byte keys<br/>2048-bit security<br/>Slower handshake"]
     end
-    subgraph ECDH ["Elliptic Curve DH (ECDH)"]
+    subgraph ECDH
+        T_ECDH["Elliptic Curve DH (ECDH)"]
+        T_ECDH ~~~ EC1
         EC1["~32-byte keys<br/>256-bit ECC ≈ 2048-bit DH security<br/>Faster, smaller — used in TLS 1.3"]
     end
     DH --> |"Same idea, better math"| ECDH
@@ -340,15 +356,19 @@ sequenceDiagram
 > **Why you can't just hash passwords.** Passwords need to be stored so you can verify them at login — but never retrievable. The solution has evolved from plain hashes to deliberately slow, salted algorithms.
 
 ```mermaid
-%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 50, 'bottom': 10}}}}%%
 flowchart TD
-    subgraph Stage1 ["❌ Stage 1: Plain SHA-256 (INSECURE)"]
+    subgraph Stage1
+        T_Stage1["❌ Stage 1: Plain SHA-256 (INSECURE)"]
+        T_Stage1 ~~~ P1
         P1["password"] -->|"SHA-256"| H1["5e884898..."]
         H1 --> RT[("Rainbow Table<br/>10B entries")]
         RT -->|"instant lookup"| CRACK1["💥 CRACKED"]
     end
 
-    subgraph Stage2 ["⚠️ Stage 2: SHA-256 + Salt (BETTER)"]
+    subgraph Stage2
+        T_Stage2["⚠️ Stage 2: SHA-256 + Salt (BETTER)"]
+        T_Stage2 ~~~ SALT
         SALT["Random Salt<br/>per user"] --> COMBINE["salt + password"]
         P2["password"] --> COMBINE
         COMBINE -->|"SHA-256"| H2["unique hash"]
@@ -356,7 +376,9 @@ flowchart TD
         BRUTE --> CRACK2["💥 Still fast to crack"]
     end
 
-    subgraph Stage3 ["✅ Stage 3: PBKDF2 / bcrypt / Argon2 (SECURE)"]
+    subgraph Stage3
+        T_Stage3["✅ Stage 3: PBKDF2 / bcrypt / Argon2 (SECURE)"]
+        T_Stage3 ~~~ P3
         P3["password"] --> SLOW["310,000 rounds<br/>of HMAC-SHA256"]
         SALT2["Unique Salt"] --> SLOW
         SLOW --> H3["derived key"]
@@ -379,19 +401,25 @@ flowchart TD
 > **Smaller keys, same security.** ECC is an alternative mathematical foundation for public-key cryptography. The same operations (signing, key exchange) work with dramatically smaller keys.
 
 ```mermaid
-%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 50, 'bottom': 10}}}}%%
 flowchart TD
-    subgraph RSA ["RSA-2048"]
+    subgraph RSA
+        T_RSA["RSA-2048"]
+        T_RSA ~~~ RSAP
         RSAP["Private key: ~1200 bytes<br/>Public key: ~294 bytes<br/>Security: ~112 bits<br/>Math: modular exponentiation"]
     end
 
-    subgraph ECC ["ECDSA / ECDH (P-256)"]
+    subgraph ECC
+        T_ECC["ECDSA / ECDH (P-256)"]
+        T_ECC ~~~ ECCP
         ECCP["Private key: ~67 bytes<br/>Public key: ~91 bytes<br/>Security: ~128 bits<br/>Math: elliptic curve groups"]
     end
 
     RSA -->|"8× smaller<br/>more secure"| ECC
 
-    subgraph Uses ["Real-world uses of ECC"]
+    subgraph Uses
+        T_Uses["Real-world uses of ECC"]
+        T_Uses ~~~ U1
         U1["Bitcoin / Ethereum<br/>Transaction signing (secp256k1)"]
         U2["TLS 1.3<br/>ECDHE key exchange + ECDSA certs"]
         U3["JWT ES256<br/>API token signing"]
@@ -486,14 +514,18 @@ sequenceDiagram
 ### Weak Randomness
 
 ```mermaid
-%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 50, 'bottom': 10}}}}%%
 flowchart TD
-    subgraph Weak ["❌ java.util.Random"]
+    subgraph Weak
+        T_Weak["❌ java.util.Random"]
+        T_Weak ~~~ SEED
         SEED["Seed = currentTimeMillis()"] --> LCG["Linear Congruential<br/>Generator"] --> OUT1["'Random' output"]
         OUT1 -.->|"attacker sees output<br/>guesses seed window"| SAME["Reproduces identical output<br/>💥 Token forged"]
     end
 
-    subgraph Strong ["✅ java.security.SecureRandom"]
+    subgraph Strong
+        T_Strong["✅ java.security.SecureRandom"]
+        T_Strong ~~~ ENTROPY
         ENTROPY["OS entropy pool<br/>(hardware noise, timing...)"] --> CSPRNG["CSPRNG<br/>(e.g., DRBG)"] --> OUT2["Truly unpredictable<br/>256-bit tokens"]
     end
 ```
@@ -501,20 +533,26 @@ flowchart TD
 ### Rainbow Table Attack
 
 ```mermaid
-%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 50, 'bottom': 10}}}}%%
 flowchart TD
-    subgraph Build ["Attacker builds rainbow table (once, offline)"]
+    subgraph Build
+        T_Build["Attacker builds rainbow table (once, offline)"]
+        T_Build ~~~ PW1
         PW1["password"] -->|SHA-256| H1["5e884898..."]
         PW2["123456"] -->|SHA-256| H2["8d969eef..."]
         PW3["qwerty"] -->|SHA-256| H3["65e84be3..."]
         PW4["...billions more..."] --> H4["..."]
     end
 
-    subgraph Attack ["Stolen database — unsalted hashes"]
+    subgraph Attack
+        T_Attack["Stolen database — unsalted hashes"]
+        T_Attack ~~~ STOLEN
         STOLEN["5e884898... (Alice's hash)"] -->|"O(1) lookup"| FOUND["password 💥"]
     end
 
-    subgraph Defense ["Salted hashes — attack fails"]
+    subgraph Defense
+        T_Defense["Salted hashes — attack fails"]
+        T_Defense ~~~ SALT
         SALT["Random Salt<br/>(unique per user)"] --> COMBINE["salt + password"]
         COMBINE -->|SHA-256| UNIQUE["a8c3f2b1... (unique)"]
         UNIQUE -->|"lookup"| NOTFOUND["NOT IN TABLE ✅"]

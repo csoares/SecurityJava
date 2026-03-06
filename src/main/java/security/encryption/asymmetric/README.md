@@ -14,9 +14,11 @@ mvn exec:java -Dexec.mainClass="security.encryption.asymmetric.AsymmetricEncrypt
 ### Key Generation and Encryption Flow
 
 ```mermaid
-%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 20, 'bottom': 5}}}}%%
+%%{init: {'flowchart': {'subGraphTitleMargin': {'top': 50, 'bottom': 10}}}}%%
 flowchart TD
-    subgraph KeyGen ["1️⃣ Key Generation — RSA-2048"]
+    subgraph KeyGen
+        T_KeyGen["1️⃣ Key Generation — RSA-2048"]
+        T_KeyGen ~~~ KPG
         KPG["KeyPairGenerator<br/>(RSA, 2048 bits)"]
         PUB["🔓 Public Key<br/>Share with the world<br/>Used to ENCRYPT"]
         PRIV["🔑 Private Key<br/>NEVER share<br/>Used to DECRYPT"]
@@ -24,14 +26,18 @@ flowchart TD
         KPG --> PRIV
     end
 
-    subgraph EncFlow ["2️⃣ Encryption  (anyone with the public key can do this)"]
+    subgraph EncFlow
+        T_EncFlow["2️⃣ Encryption  (anyone with the public key can do this)"]
+        T_EncFlow ~~~ PT
         PT["Plaintext<br/>'Hello World'"]
         ENC["Cipher.encrypt<br/>(PUBLIC key)"]
         CT["Ciphertext<br/>(Base64-encoded)"]
         PT --> ENC --> CT
     end
 
-    subgraph DecFlow ["3️⃣ Decryption  (only the private key holder can do this)"]
+    subgraph DecFlow
+        T_DecFlow["3️⃣ Decryption  (only the private key holder can do this)"]
+        T_DecFlow ~~~ CT2
         CT2["Ciphertext<br/>(Base64-encoded)"]
         DEC["Cipher.decrypt<br/>(PRIVATE key)"]
         PT2["Plaintext<br/>'Hello World'"]
