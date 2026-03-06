@@ -35,16 +35,16 @@ flowchart TD
 
     A --> B --> C --> D --> E --> F --> G --> H --> I --> J
 
-    style A fill:#e8d5b7
-    style B fill:#b7d5e8
-    style C fill:#b7d5e8
-    style D fill:#c8e8b7
-    style E fill:#c8e8b7
-    style F fill:#c8e8b7
-    style G fill:#e8c8b7
-    style H fill:#e8e8b7
-    style I fill:#d5b7e8
-    style J fill:#f5b7b7
+    style A fill:#e8d5b7,color:#000000
+    style B fill:#b7d5e8,color:#000000
+    style C fill:#b7d5e8,color:#000000
+    style D fill:#c8e8b7,color:#000000
+    style E fill:#c8e8b7,color:#000000
+    style F fill:#c8e8b7,color:#000000
+    style G fill:#e8c8b7,color:#000000
+    style H fill:#e8e8b7,color:#000000
+    style I fill:#d5b7e8,color:#000000
+    style J fill:#f5b7b7,color:#000000
 ```
 
 ---
@@ -109,10 +109,10 @@ flowchart LR
     C --> A
     C --> F
 
-    style P fill:#e8f4e8
-    style C fill:#f4e8e8
-    style A fill:#fff3cd
-    style F fill:#fff3cd
+    style P fill:#e8f4e8,color:#000000
+    style C fill:#f4e8e8,color:#000000
+    style A fill:#fff3cd,color:#000000
+    style F fill:#fff3cd,color:#000000
 ```
 
 | File | Key concepts |
@@ -460,10 +460,10 @@ flowchart TD
     ROOT -->|"4. check against"| TRUST
     TRUST -->|"✅ Root known"| OK
 
-    style ROOT fill:#d4edda
-    style INT fill:#cce5ff
-    style SERVER fill:#fff3cd
-    style TRUST fill:#d4edda
+    style ROOT fill:#d4edda,color:#000000
+    style INT fill:#cce5ff,color:#000000
+    style SERVER fill:#fff3cd,color:#000000
+    style TRUST fill:#d4edda,color:#000000
 ```
 
 ```mermaid
@@ -590,12 +590,12 @@ flowchart TD
 
     CONF --> RSA2["RSA / ECDSA<br/>(for key exchange)"]
 
-    style Q fill:#f0f0f0
-    style AES fill:#b7d5e8
-    style HASH fill:#e8d5b7
-    style HMAC2 fill:#e8c8b7
-    style SIG fill:#c8e8b7
-    style RSA2 fill:#c8e8b7
+    style Q fill:#f0f0f0,color:#000000
+    style AES fill:#b7d5e8,color:#000000
+    style HASH fill:#e8d5b7,color:#000000
+    style HMAC2 fill:#e8c8b7,color:#000000
+    style SIG fill:#c8e8b7,color:#000000
+    style RSA2 fill:#c8e8b7,color:#000000
 ```
 
 ## Key Size Cheat Sheet
