@@ -4,212 +4,250 @@ theme: default
 paginate: true
 style: |
   section { font-size: 1.4rem; }
-  section.lead h1 { font-size: 2.8rem; }
-  code { font-size: 1.1rem; }
+  section.lead h1 { font-size: 2.6rem; }
+  section.lead h2 { font-size: 1.8rem; color: #555; }
+  pre { font-size: 1rem; }
+  blockquote { border-left: 4px solid #f90; padding-left: 1em; color: #555; }
 ---
 
 <!-- _class: lead -->
 
 # Lecture 10
 ## Attacks & Defences
-
-Timing Attacks · Weak Randomness · Rainbow Tables · Secure Coding Rules
+### Think like an attacker — defend like an expert
 
 ---
 
-## Why Learn About Attacks?
+## Why Learn Attacks?
 
-> "The best defence is understanding how attacks work."
+> "To defeat your enemy, you must understand how they think."
 
-A developer who does not understand attacks will:
-- Use `String.equals()` for MAC comparison (timing attack)
-- Use `new Random()` for key generation (predictable keys)
-- Use MD5 for password hashing (rainbow tables)
+The three mistakes we'll cover today have caused:
+- Hundreds of millions of stolen passwords
+- Billions of dollars in fraud
+- Real-world consequences for real people
 
-These are not theoretical — they cause real breaches every year.
+And all three are **trivially easy to avoid** once you know about them.
 
 ---
 
 ## Attack 1 — Timing Attack
 
-**Premise:** the time taken by code reveals secret information.
+**Core idea:** the time your code takes reveals secret information.
 
-```java
-// VULNERABLE — exits as soon as a byte mismatches
-boolean verify(String submitted, String expected) {
-    return submitted.equals(expected);
-}
+Real scenario:
+```
+User submits a password reset token.
+Server checks: if (submittedToken.equals(storedToken))
+
+The .equals() method stops as soon as it finds a mismatch.
 ```
 
-If the first byte mismatches: returns in ~1 ns
-If first 10 bytes match: returns in ~10 ns
+An attacker sends millions of token guesses and measures response time:
 
-An attacker sends millions of guesses and measures response time.
-They can recover the correct value byte-by-byte.
+```
+Try "AAAA..." → 1.00 ms (first char wrong — exits immediately)
+Try "XAAA..." → 1.00 ms (first char wrong)
+Try "5AAA..." → 1.05 ms (first char matched! more work done)
+               → first character is "5"
+Repeat for each position...
+```
 
 ---
 
-## Timing Attack — Byte by Byte
+## Timing Attack — Visualised
 
 ```
-Try: AAAAAAAAAAAAAAAA  → returns in 1.0 ns (first byte wrong)
-Try: XAAAAAAAAAAAAAAA  → returns in 1.0 ns (first byte wrong)
-Try: 5AAAAAAAAAAAAAAA  → returns in 2.1 ns (first byte matched! extra work done)
+Correct token:  5 F 3 A 9 B ...
 
-Now first byte is known = 0x35 ('5')
-Repeat for second byte, third byte...
+Try: AAAAAAA  → fail at position 1 (fast)
+Try: 5AAAAAA  → fail at position 2 (a bit slower)
+Try: 5FAAAAA  → fail at position 3 (a bit more slower)
+Try: 5F3AAAA  → fail at position 4 (even slower)
+...
+
+With enough measurements to average out network noise,
+the attacker recovers the full token character by character.
+
+32-char token: instead of 62^32 guesses,
+               only 62 × 32 = 1,984 guesses!
 ```
 
-With enough samples to average out noise, the full secret is recovered without knowing the algorithm.
-
-**Real-world impact:** ISAKMP (VPN), OAuth tokens, session cookies.
+A 32-character token reduced to under 2000 guesses.
 
 ---
 
-## Defence — Constant-Time Comparison
+## Timing Attack — The Fix
 
 ```java
-// SAFE — always processes all bytes
-boolean verify(byte[] submitted, byte[] expected) {
-    return MessageDigest.isEqual(submitted, expected);
-}
+// VULNERABLE:
+if (userToken.equals(storedToken))      // stops early!
+if (Arrays.equals(a, b))                // stops early!
+
+// SAFE:
+if (MessageDigest.isEqual(a, b))        // always checks ALL bytes
 ```
 
-Internally:
+**How it works:**
 ```java
+// Conceptual constant-time comparison:
 int diff = 0;
-for (int i = 0; i < a.length; i++) {
-    diff |= (a[i] ^ b[i]); // XOR — 0 if equal, non-zero if different
+for (int i = 0; i < expected.length; i++) {
+    diff |= submitted[i] ^ expected[i];   // accumulate all differences
 }
-return diff == 0; // only true if ALL bytes matched
+return diff == 0;  // only true if ALL bytes matched
 ```
 
-Time is constant regardless of where the mismatch occurs.
+Time is always the same. Timing measurement reveals nothing.
 
 ---
 
 ## Attack 2 — Weak Randomness
 
-**Premise:** predictable "random" values break key generation, IV generation, token generation.
+**Core idea:** predictable "random" numbers break everything that depends on them.
 
 ```java
-// VULNERABLE — java.util.Random is a Linear Congruential Generator
-Random rng = new Random();
-byte[] key = new byte[32];
-rng.nextBytes(key); // predictable from seed!
+// DANGEROUS:
+Random rng = new Random();  // java.util.Random
+byte[] sessionToken = new byte[32];
+rng.nextBytes(sessionToken);  // predictable!
 ```
 
-`java.util.Random` uses a 48-bit seed. If an attacker observes one output value, they can predict all past and future values.
-
-**The entire key is compromised before it is even used.**
-
----
-
-## Linear Congruential Generator (LCG)
-
-`java.util.Random` implements:
+`java.util.Random` uses a 48-bit internal state.
 
 ```
 state(n+1) = (state(n) × 25214903917 + 11) mod 2^48
+
+If attacker observes even ONE output:
+  They can recover the 48-bit state by brute force (2^48 = fast)
+  They can predict ALL future tokens
+  Every session token, CSRF token, API key is compromised
 ```
-
-Given any output, you can:
-1. Recover the 48-bit internal state (by brute force: only 2^48 possibilities)
-2. Predict all future outputs
-3. Recover the AES key, IV, session token, or CSRF token
-
-**2^48 = 281 trillion** — sounds large, but a GPU cracks it in seconds.
 
 ---
 
-## Defence — Cryptographically Secure RNG
+## Weak Randomness — Real Attack
+
+```
+Step 1: Attacker creates an account on the site.
+Step 2: They receive their session token.
+Step 3: From the token, they recover the RNG seed
+        (brute force: try all 2^48 ≈ 281 trillion seeds,
+         fast on a GPU in seconds).
+Step 4: They predict the next session token generated.
+Step 5: That token belongs to the next user who logged in.
+Step 6: Attacker uses that token to log in as that user.
+```
+
+This is **not theoretical**. It has been found in production web apps.
+
+---
+
+## Weak Randomness — The Fix
 
 ```java
-// SAFE — uses OS entropy (/dev/urandom on Linux, CryptGenRandom on Windows)
+// WRONG:
+Random rng = new Random();
+
+// RIGHT:
 SecureRandom rng = new SecureRandom();
-byte[] key = new byte[32];
-rng.nextBytes(key);
 ```
 
-`SecureRandom` is:
-- Seeded from system entropy (hardware noise, interrupt timing, etc.)
-- Unpredictable: knowing past outputs gives no information about future outputs
-- Compliant with FIPS 140-2
+`SecureRandom` uses the operating system's entropy pool:
+- Hardware noise (CPU timing jitter, disk access timing)
+- Mouse movement, keyboard timing
+- Network packet arrival times
 
-**Rule:** always use `SecureRandom` for any security-sensitive random values.
+```
+Entropy gathered: truly unpredictable physical events
+Internal state:   256+ bits (not 48!)
+Prediction:       computationally infeasible
+```
+
+**Always use `SecureRandom` for keys, tokens, IVs, salts.**
 
 ---
 
-## When to Use SecureRandom
+## When to Use Which Random
 
-| Use case | Use |
-|----------|-----|
-| AES key generation | `SecureRandom` |
-| IV / nonce generation | `SecureRandom` |
-| CSRF token | `SecureRandom` |
-| Password reset token | `SecureRandom` |
-| Session ID | `SecureRandom` |
-| Game dice roll | `Random` (fine) |
-| Shuffle a playlist | `Random` (fine) |
-| Statistical simulation | `Random` (fine) |
+```
+┌──────────────────────────────────────────────────────┐
+│  Security-sensitive → SecureRandom                   │
+│    ✓ AES key                                         │
+│    ✓ Session token / CSRF token                      │
+│    ✓ Password reset link                             │
+│    ✓ IV / salt                                       │
+│    ✓ API key generation                              │
+├──────────────────────────────────────────────────────┤
+│  Not security-sensitive → Random (fine)              │
+│    ✓ Game dice roll                                  │
+│    ✓ Shuffle a playlist                              │
+│    ✓ Pick a random test item                         │
+│    ✓ Statistical simulation                          │
+└──────────────────────────────────────────────────────┘
+```
 
 ---
 
 ## Attack 3 — Rainbow Tables
 
-**Premise:** precomputed tables map hash values back to passwords.
+**Core idea:** precompute hash → password mappings and store them.
 
 ```
-Attacker precomputes offline:
-  sha256("password")   → 5e884898...
-  sha256("123456")     → 8d969eef...
-  sha256("letmein")    → 0d107d09...
-  ... (billions of entries, terabytes of data, computed once)
+Attacker spends time (or buys a table):
+  sha256("password") → 5e884898...
+  sha256("123456")   → 8d969eef...
+  sha256("letmein")  → 0d107d09...
+  ... (100 billion entries, 5 TB of storage)
 
-Attacker gets your database (plain SHA-256 passwords):
-  Looks up each hash → instant password recovery
+Then gets your password database (plain SHA-256 hashes):
+  User: alice  hash: 5e884898...  → lookup → "password" ✓
+  User: bob    hash: 8d969eef...  → lookup → "123456"   ✓
+  User: carol  hash: 0d107d09...  → lookup → "letmein"  ✓
+
+All three cracked in milliseconds.
 ```
-
-Free rainbow tables are available online for all common passwords.
 
 ---
 
-## Defence Against Rainbow Tables — Salting
+## Rainbow Table Defence — Salting
 
-```java
-// Salt: a random unique value per user
-byte[] salt = new byte[16];
-new SecureRandom().nextBytes(salt);
+```
+Without salt:
+  sha256("password") = 5e884898...  ← in every rainbow table
 
-// Hash includes the salt
-byte[] hash = sha256(concat(salt, password));
+With unique salt per user:
+  salt_alice = "7f3a91b2..."  (random 16 bytes)
+  sha256("7f3a91b2..." + "password") = a3c7e9f1...  ← NOT in any table
 
-// Stored: (userId, salt, hash)
+  salt_bob   = "2c8d45e1..."  (different random bytes)
+  sha256("2c8d45e1..." + "password") = 8f2b4c7d...  ← also NOT in table
 ```
 
-The attacker's precomputed table contains `sha256("password")` but not `sha256(salt + "password")`.
-They must brute-force each user individually — no table reuse.
+The precomputed table is now **useless**.
 
-**But salting alone is not enough — use PBKDF2/bcrypt/Argon2 too (Lecture 8).**
-
----
-
-## Summary — Secure Coding Rules
-
-| Rule | Why |
-|------|-----|
-| Use `SecureRandom` for all keys, IVs, tokens | `Random` is predictable |
-| Use `MessageDigest.isEqual` for MAC/hash comparison | Timing attacks |
-| Never use MD5 or SHA-1 for security | Collisions found |
-| Never use plain SHA-256 for passwords | Rainbow tables, fast GPUs |
-| Always use PBKDF2 / bcrypt / Argon2 for passwords | Deliberate slowness |
-| Never use ECB mode | Patterns survive |
-| Always use AES-GCM | Confidentiality + Integrity |
-| Validate ALL inputs | Injection attacks |
+Attacker must brute-force each user individually — and with PBKDF2, that takes centuries.
 
 ---
 
-## Running the Examples
+## Summary — The Secure Coding Checklist
+
+```
+□ Use SecureRandom for ALL security-sensitive values
+□ Use MessageDigest.isEqual() for ALL security comparisons
+□ Use AES-256-GCM (not ECB, not CBC without MAC)
+□ Use SHA-256 for general hashing (not MD5, not SHA-1)
+□ Use PBKDF2 / bcrypt / Argon2 for passwords (not plain hash)
+□ Use unique random salt per user for passwords
+□ Use ECDHE for key exchange (forward secrecy)
+□ Use HMAC to authenticate messages (not plain hash)
+□ Never hardcode keys in source code
+□ Never log passwords or sensitive data
+```
+
+---
+
+## Try It Yourself
 
 ```bash
 mvn exec:java -Dexec.mainClass="security.attacks.TimingAttackExample"
@@ -217,38 +255,23 @@ mvn exec:java -Dexec.mainClass="security.attacks.WeakRandomnessExample"
 mvn exec:java -Dexec.mainClass="security.attacks.RainbowTableExample"
 ```
 
-Observe:
-- **Timing:** measurable time difference between early-exit and constant-time comparison
-- **Weak RNG:** `Random` seeds recovered, future values predicted
-- **Rainbow:** plain hash looked up instantly; salted hash requires full brute-force
-
----
-
-## Course Summary
-
-| Topic | Key Takeaway |
-|-------|-------------|
-| Classical Ciphers | Small key space + patterns = broken |
-| Symmetric Encryption | AES-256-GCM is the standard |
-| Block Cipher Modes | ECB: never. GCM: always. |
-| Hashing | SHA-256 for integrity; never for passwords alone |
-| Digital Signatures | RSA/ECDSA — integrity + identity + non-repudiation |
-| HMAC | Shared-key authentication; constant-time compare |
-| Key Exchange | ECDHE for forward secrecy |
-| Passwords | PBKDF2 / bcrypt / Argon2 with unique salts |
-| PKI | Certificate chains establish public key trust |
-| Attacks | Know them to defend against them |
+**Timing:** observe measurable time difference between safe and unsafe comparison.
+**Weak RNG:** watch the seed being recovered and future tokens predicted.
+**Rainbow:** plain SHA-256 cracked instantly; salted + PBKDF2 is safe.
 
 ---
 
 <!-- _class: lead -->
 
-# Thank You
+# Course Complete!
 
-All examples are runnable at:
-**github.com/csoares/SecurityJava**
+**You now know:**
+Ciphers · AES · Modes · Hashing · Signatures · HMAC · Key Exchange · Passwords · PKI · Attacks
 
+**All examples:**
 ```bash
 git clone https://github.com/csoares/SecurityJava
-mvn exec:java -Dexec.mainClass="security.attacks.TimingAttackExample"
 ```
+
+> Security is not about making systems unbreakable.
+> It's about making them too expensive to break.

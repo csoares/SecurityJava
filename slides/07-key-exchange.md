@@ -4,68 +4,75 @@ theme: default
 paginate: true
 style: |
   section { font-size: 1.4rem; }
-  section.lead h1 { font-size: 2.8rem; }
-  code { font-size: 1.1rem; }
+  section.lead h1 { font-size: 2.6rem; }
+  section.lead h2 { font-size: 1.8rem; color: #555; }
+  pre { font-size: 1rem; }
+  blockquote { border-left: 4px solid #f90; padding-left: 1em; color: #555; }
 ---
 
 <!-- _class: lead -->
 
 # Lecture 7
 ## Key Exchange
-
-Diffie-Hellman · ECDH · Forward Secrecy · ECC
-
----
-
-## The Key Distribution Problem
-
-Symmetric encryption (AES) requires a shared key.
-But how do Alice and Bob agree on a key if Eve is watching every message?
-
-**They cannot simply send the key — Eve would intercept it.**
-
-This was considered unsolvable for thousands of years.
-
-In 1976, Diffie and Hellman published an elegant mathematical solution.
+### Agree on a secret in public — without revealing it
 
 ---
 
-## Diffie-Hellman — The Colour Analogy
+## The Problem
+
+AES is secure — but both parties need the **same key**.
+
+If Alice emails the key to Bob, Eve reads it.
+If Alice posts the key, everyone knows it.
+If they meet in person... that doesn't scale.
+
+**For 2,000 years this was considered impossible.**
+
+In 1976, Whitfield Diffie and Martin Hellman published a solution
+that changed everything.
+
+---
+
+## The Paint Mixing Analogy
+
+This is the most intuitive explanation of key exchange:
 
 ```
-Public information: Yellow (everyone knows this)
+Both agree on a public colour:  YELLOW (everyone knows this)
+
+Alice picks a secret:  RED        Bob picks a secret:  BLUE
+
+Alice mixes: YELLOW + RED = ORANGE    Bob mixes: YELLOW + BLUE = TEAL
+         (sends ORANGE publicly)              (sends TEAL publicly)
+
+Alice: TEAL + RED = BROWN         Bob: ORANGE + BLUE = BROWN
+```
+
+Both arrive at **BROWN** — the shared secret.
+
+Eve sees YELLOW, ORANGE, TEAL.
+To get BROWN she'd need to "un-mix" paint — mathematically infeasible.
+
+---
+
+## The Mathematics — Discrete Logarithm
+
+```
+Public parameters: prime p, generator g  (everyone knows these)
 
 Alice:                          Bob:
-Secret colour: Red              Secret colour: Blue
-Mix: Yellow + Red = Orange      Mix: Yellow + Blue = Teal
+  picks secret: a                 picks secret: b
+  computes: A = g^a mod p         computes: B = g^b mod p
+  publishes A                     publishes B
 
-Exchange Orange and Teal publicly (Eve sees them)
+Alice:                          Bob:
+  shared = B^a mod p              shared = A^b mod p
+         = g^(ba) mod p                  = g^(ab) mod p
+         = g^(ab) mod p  ← SAME VALUE ✓
 
-Alice: Teal + Red = Brown       Bob: Orange + Blue = Brown
-```
-
-Both arrive at **Brown** (the shared secret) without ever sending it.
-Eve sees Yellow, Orange, Teal — but cannot compute Brown.
-
----
-
-## Diffie-Hellman — The Mathematics
-
-Public parameters: prime `p`, generator `g`
-
-```
-Alice picks secret: a
-Computes:           A = g^a mod p   ← sends this publicly
-
-Bob picks secret:   b
-Computes:           B = g^b mod p   ← sends this publicly
-
-Alice:  shared = B^a mod p = g^(ab) mod p
-Bob:    shared = A^b mod p = g^(ab) mod p
-
-Eve knows: g, p, A, B
-She needs: a (solve g^a ≡ A mod p)  — the Discrete Logarithm Problem
-At 2048 bits: no efficient algorithm exists
+Eve sees: g, p, A = g^a mod p, B = g^b mod p
+Eve needs: a  →  solve  g^a ≡ A  (mod p)
+= Discrete Logarithm Problem — no efficient algorithm at 2048 bits
 ```
 
 ---
@@ -73,135 +80,142 @@ At 2048 bits: no efficient algorithm exists
 ## Diffie-Hellman in Java
 
 ```java
-// Both agree on parameters
-DHParameterSpec dhParams = /* NIST group, 2048-bit prime */;
+// Step 1: Generate Alice's key pair
+KeyPairGenerator kpg = KeyPairGenerator.getInstance("DH");
+kpg.initialize(2048); // 2048-bit prime
+KeyPair alice = kpg.generateKeyPair();
 
-// Alice
-KeyPairGenerator aliceKpg = KeyPairGenerator.getInstance("DH");
-aliceKpg.initialize(dhParams);
-KeyPair aliceKp = aliceKpg.generateKeyPair();
-// Alice sends aliceKp.getPublic() to Bob
+// Step 2: Generate Bob's key pair (same parameters)
+KeyPairGenerator kpg2 = KeyPairGenerator.getInstance("DH");
+kpg2.initialize(((DHPublicKey) alice.getPublic()).getParams());
+KeyPair bob = kpg2.generateKeyPair();
 
-// Bob
-KeyPairGenerator bobKpg = KeyPairGenerator.getInstance("DH");
-bobKpg.initialize(dhParams);
-KeyPair bobKp = bobKpg.generateKeyPair();
-// Bob sends bobKp.getPublic() to Alice
-
-// Both compute shared secret
+// Step 3: Both compute the shared secret independently
 KeyAgreement ka = KeyAgreement.getInstance("DH");
-ka.init(aliceKp.getPrivate());
-ka.doPhase(bobKp.getPublic(), true);
-byte[] sharedSecret = ka.generateSecret();
+ka.init(alice.getPrivate());
+ka.doPhase(bob.getPublic(), true);
+byte[] sharedSecret = ka.generateSecret(); // same on both sides ✓
 ```
 
 ---
 
-## DH Weakness — No Authentication
+## ⚠️ DH Has No Authentication
 
-DH alone is vulnerable to a Man-in-the-Middle attack:
+DH tells us two parties agreed on a secret.
+It does **not** tell us WHO those parties are.
 
 ```
-Alice ──── sends A ────> Eve ──── sends E1 ────> Bob
-Alice <─── gets E2 ──── Eve <──── gets B ─────── Bob
+Alice ─── sends A ──► Mallory ─── sends M1 ──► Bob
+Alice ◄── gets M2 ─── Mallory ◄── gets B ───── Bob
 
-Eve establishes:
-  One shared secret with Alice (using E2, A)
-  One shared secret with Bob   (using B, E1)
+Mallory has:
+  Secret with Alice: she thinks she's talking to Bob
+  Secret with Bob:   he thinks he's talking to Alice
 
-Alice and Bob think they're talking to each other — they're not!
+Mallory decrypts both sides, reads everything, re-encrypts.
+Neither Alice nor Bob suspects anything.
 ```
 
-**Fix:** authenticate the DH public keys using digital signatures → TLS certificates.
+This is a **Man-in-the-Middle attack**.
 
 ---
 
-## Elliptic Curve Diffie-Hellman (ECDH)
+## Fix: Authenticate the Keys
 
-Same idea as DH, but uses elliptic curve point multiplication instead of modular exponentiation.
+TLS solves this by having the server **sign** its DH public key:
 
 ```
-Classic DH: A = g^a mod p
-ECDH:       A = a × G   (point multiplication on a curve)
+Bob sends:  B (DH public key)
+            + Signature(B, bob_private_key)
+            + bob_certificate (links public key to "Bob")
+
+Alice verifies:
+  1. Certificate is valid (signed by a CA she trusts → Lecture 9)
+  2. Signature on B is valid (really Bob's key, not Mallory's)
 ```
 
-| Security Level | Classic DH | ECDH |
-|---------------|------------|------|
-| 112-bit | 2048-bit key | 224-bit key |
-| 128-bit | 3072-bit key | 256-bit key |
-| 256-bit | 15360-bit key | 521-bit key |
+DH + Authentication = **secure key exchange**.
 
-**8× smaller keys for the same security.** Used in TLS 1.3, Signal, WhatsApp.
+---
+
+## ECDH — Same Idea, Better Maths
+
+Elliptic Curve Diffie-Hellman — uses curves instead of modular arithmetic:
+
+```
+Classic DH:   A = g^a mod p           (modular exponentiation)
+ECDH:         A = a × G               (point multiplication on a curve)
+```
+
+**Why bother?**
+
+| Security level | Classic DH key | ECDH key |
+|---------------|----------------|----------|
+| 112-bit | 2048 bits | 224 bits |
+| 128-bit | 3072 bits | **256 bits** |
+| 256-bit | 15360 bits | 521 bits |
+
+**8× smaller keys, faster operations, same security.**
+TLS 1.3 uses ECDH by default (curve P-256 or X25519).
 
 ---
 
 ## ECDH in Java
 
 ```java
-// Use NIST P-256 curve (secp256r1)
+// Use NIST P-256 curve (secp256r1) — 256-bit key, 128-bit security
 KeyPairGenerator kpg = KeyPairGenerator.getInstance("EC");
 kpg.initialize(new ECGenParameterSpec("secp256r1"));
 
-KeyPair aliceKp = kpg.generateKeyPair();
-KeyPair bobKp   = kpg.generateKeyPair();
+KeyPair alice = kpg.generateKeyPair();
+KeyPair bob   = kpg.generateKeyPair();
 
-// Alice computes shared secret
+// Compute shared secret
 KeyAgreement ka = KeyAgreement.getInstance("ECDH");
-ka.init(aliceKp.getPrivate());
-ka.doPhase(bobKp.getPublic(), true);
+ka.init(alice.getPrivate());
+ka.doPhase(bob.getPublic(), true);
 byte[] sharedSecret = ka.generateSecret();
-// → derive AES key from this using HKDF
+// → derive AES-256 key from this shared secret using SHA-256
 ```
 
 ---
 
-## Deriving Keys from the Shared Secret
+## Forward Secrecy — Why It Matters
 
-The raw DH/ECDH output is not directly suitable as an AES key.
-Use a **Key Derivation Function (KDF)** to derive proper key material:
-
-```java
-// Simple approach: SHA-256 the shared secret
-MessageDigest md = MessageDigest.getInstance("SHA-256");
-byte[] aesKey = md.digest(sharedSecret);
-
-// Better: HKDF (RFC 5869)
-// HKDF-Extract → HKDF-Expand → key material
+**Without forward secrecy (static keys):**
+```
+Eve records all encrypted traffic for years.
+In 2035, she hacks the server and gets the private key.
+She decrypts all recorded traffic from 2025 onwards. 🔓
 ```
 
-HKDF separates extraction (make a uniform random value) from expansion (derive multiple keys).
+**With ephemeral ECDH (ECDHE):**
+```
+Each session: new ECDH key pair generated
+              shared secret used for session
+              key pair deleted after handshake
+
+Eve records traffic.
+In 2035, she gets the private key.
+She cannot decrypt old sessions — the ephemeral keys are gone. ✓
+```
+
+**TLS 1.3 mandates ECDHE. Forward secrecy is not optional.**
 
 ---
 
-## Forward Secrecy — Ephemeral Key Exchange
-
-**Static DH:** both parties have long-term key pairs. If private key leaks, all past sessions can be decrypted from captured traffic.
-
-**Ephemeral ECDH (ECDHE):** fresh key pair for every session.
-
-```
-Session 1: Alice generates K1 (ephemeral) → computes shared secret → deletes K1
-Session 2: Alice generates K2 (ephemeral) → computes shared secret → deletes K2
-```
-
-If the server's long-term private key is later compromised, past sessions are still protected — the ephemeral keys are gone.
-
-**TLS 1.3 mandates ECDHE — forward secrecy is not optional.**
-
----
-
-## Running the Examples
+## Try It Yourself
 
 ```bash
 mvn exec:java -Dexec.mainClass="security.keyexchange.DiffieHellmanExample"
 mvn exec:java -Dexec.mainClass="security.keyexchange.ECDHExample"
 ```
 
-Observe:
-- Both parties independently compute the same shared secret
-- The secret is never transmitted
+**What to observe:**
+- Alice and Bob independently compute **the same** shared secret
+- The secret is never sent over the network
 - ECDH keys are much smaller than classic DH keys
-- Key derivation step: raw secret → AES key
+- Key derivation: raw shared secret → AES key via SHA-256
 
 ---
 
@@ -209,4 +223,4 @@ Observe:
 
 ## Next: Lecture 8
 # Password Security
-### Why plain hashing is catastrophically wrong
+### The #1 cause of data breaches
