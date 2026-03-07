@@ -4,66 +4,123 @@ theme: default
 paginate: true
 style: |
   section { font-size: 1.4rem; }
-  section.lead h1 { font-size: 2.8rem; }
-  code { font-size: 1.1rem; }
+  section.lead h1 { font-size: 2.6rem; }
+  section.lead h2 { font-size: 1.8rem; color: #555; }
+  pre { font-size: 1rem; }
+  blockquote { border-left: 4px solid #f90; padding-left: 1em; color: #555; }
 ---
 
 <!-- _class: lead -->
 
 # Lecture 6
 ## MAC / HMAC
-
-Message Authentication Codes · Timing Attacks · When to Use What
-
----
-
-## Message Authentication Code (MAC)
-
-A MAC is a short tag computed from a message and a **shared secret key**.
-
-```
-tag = MAC(key, message)
-```
-
-- Integrity: any modification to the message changes the tag
-- Authentication: only someone with the key can produce a valid tag
-- Forgery: an attacker without the key cannot produce a valid tag
-
-Unlike a hash, a MAC requires the key to verify — you cannot forge without it.
+### Secret handshakes — prove you know the secret
 
 ---
 
-## HMAC — Hash-based MAC
+## The Problem with Plain Hashes
 
-HMAC wraps a hash function (e.g. SHA-256) with a two-layer construction:
+Hash(message) proves the message is intact. But:
+
+```
+Mallory intercepts message + hash
+
+Mallory modifies: message → message2
+Mallory computes: hash2 = SHA256(message2)
+
+Mallory sends: message2 + hash2
+
+Bob checks: SHA256(message2) == hash2 ✓  ← FOOLED!
+```
+
+**Anyone can recompute a hash.** A hash proves nothing about WHO sent the message.
+
+We need a hash that requires a **secret key** to produce.
+
+---
+
+## The Secret Handshake Analogy
+
+Imagine two spies who agreed on a secret phrase before the mission:
+
+```
+Alice                              Bob
+  knows: "swordfish"               knows: "swordfish"
+
+  greet = mix(message, "swordfish")
+  send: message + greet
+
+                          verify = mix(message, "swordfish")
+                          greet == verify? → authentic ✓
+```
+
+An outsider without "swordfish" **cannot** produce a valid greet.
+This is exactly what HMAC does — with a cryptographic key instead of a phrase.
+
+---
+
+## HMAC — Hash-based Message Authentication Code
+
+HMAC uses a shared key to produce a tag:
+
+```
+tag = HMAC(key, message)
+```
+
+```
+SEND:
+  Alice computes: tag = HMAC-SHA256(sharedKey, message)
+  Alice sends: message + tag
+
+VERIFY:
+  Bob computes: expected = HMAC-SHA256(sharedKey, message)
+  Bob checks: expected == received_tag?
+    YES → ✅ message is authentic and unmodified
+    NO  → ❌ reject — tampered or wrong sender
+```
+
+Without the `sharedKey`, Mallory cannot produce a valid tag. End of story.
+
+---
+
+## HMAC Construction — Why Not Just Hash(key + message)?
+
+Why not just do `SHA256(key + message)`?
+
+```
+Vulnerable to length-extension attack:
+  attacker knows: SHA256(key + message)
+  attacker can compute: SHA256(key + message + extra)
+  without knowing the key!
+```
+
+HMAC uses a two-layer construction that defeats this:
 
 ```
 HMAC(key, message) =
-    SHA-256(
-        (key XOR opad) ||
-        SHA-256( (key XOR ipad) || message )
-    )
+    SHA256( (key XOR opad) ||
+            SHA256( (key XOR ipad) || message ) )
 ```
 
-Where `ipad = 0x36...` and `opad = 0x5C...` (fixed constants).
-
-**Why two layers?** Prevents length-extension attacks that break `SHA-256(key || message)`.
+Two nested hashes prevent the length-extension attack.
 
 ---
 
 ## HMAC in Java
 
 ```java
-Mac mac = Mac.getInstance("HmacSHA256");
-
-// Both parties share this key
+// Both Alice and Bob share this key (agreed in advance)
+byte[] sharedKeyBytes = new byte[32];
+new SecureRandom().nextBytes(sharedKeyBytes);
 SecretKeySpec keySpec = new SecretKeySpec(sharedKeyBytes, "HmacSHA256");
+
+Mac mac = Mac.getInstance("HmacSHA256");
 mac.init(keySpec);
 
-// Alice computes tag
-byte[] tag = mac.doFinal("Transfer $1000 to account 12345".getBytes());
+// Alice computes the tag
+byte[] tag = mac.doFinal("Transfer £1000 to account 12345".getBytes());
 
-// Bob verifies — recompute and compare
+// Bob verifies by recomputing
 mac.init(keySpec);
 byte[] expected = mac.doFinal(receivedMessage.getBytes());
 boolean valid = MessageDigest.isEqual(expected, receivedTag);
@@ -71,118 +128,110 @@ boolean valid = MessageDigest.isEqual(expected, receivedTag);
 
 ---
 
-## Attacker Cannot Forge Without the Key
+## ⚠️ The Timing Attack
 
-```
-Alice sends: message = "Transfer $1000 to account 12345"
-             tag     = HMAC(sharedKey, message)
-
-Attacker intercepts and modifies:
-             message = "Transfer $9999 to account 99999"
-
-Attacker needs to produce a valid tag for the new message.
-Without the shared key: impossible.
-
-Bob computes: expected = HMAC(sharedKey, "Transfer $9999...")
-              expected ≠ original_tag  → REJECT
-```
-
----
-
-## Timing Attack on MAC Verification
-
-**Vulnerable code:**
+Using `.equals()` for comparison is **dangerous**:
 
 ```java
-// BAD: exits early on first mismatch
-if (computedTag.equals(receivedTag)) { ... }
+// DANGEROUS:
+if (Arrays.equals(computed, received)) { ... }
+// or
+if (computed.equals(received)) { ... }
 ```
 
-An attacker can measure how long verification takes:
-- 0.1 ms → first byte matched
-- 0.2 ms → first two bytes matched
-- ...
+Why? These return `false` as soon as they find the first mismatch.
 
-By iterating over all 256 byte values, the attacker recovers the expected tag **byte by byte** without the key.
+```
+tag = [0x3F, 0xA1, 0x9B, ...]
+Try:  [0x00, ...]  → fails after 1 byte check (very fast)
+Try:  [0x3F, 0x00, ...]  → fails after 2 byte checks (slightly slower)
+Try:  [0x3F, 0xA1, 0x00, ...]  → fails after 3 byte checks (even slower)
+```
+
+An attacker measures response time to recover the tag byte by byte.
 
 ---
 
 ## Constant-Time Comparison
 
-**Safe code:**
-
 ```java
-// GOOD: always checks all bytes regardless of mismatch position
-boolean valid = MessageDigest.isEqual(computedTag, receivedTag);
+// SAFE — always checks ALL bytes, no early exit:
+boolean valid = MessageDigest.isEqual(computed, received);
 ```
 
-`MessageDigest.isEqual` is implemented to always take the same time:
-
-```java
-// Conceptually:
-int diff = 0;
-for (int i = 0; i < a.length; i++) {
-    diff |= a[i] ^ b[i]; // accumulate differences without short-circuiting
-}
-return diff == 0;
+Internally:
+```
+diff = 0
+for each byte i:
+    diff = diff OR (computed[i] XOR received[i])
+    ← accumulate differences without stopping early
+return diff == 0
 ```
 
-**Always use `MessageDigest.isEqual` for security-sensitive comparisons.**
+Time is **constant** regardless of where the mismatch is.
+The attacker's timing measurement reveals nothing.
+
+> **Rule:** always use `MessageDigest.isEqual()` for any security comparison.
 
 ---
 
-## Authentication Spectrum
+## HMAC vs Digital Signatures — When to Use Which
 
-| Method | Key | Guarantees |
-|--------|-----|-----------|
-| **Hash (SHA-256)** | None | Integrity only — anyone can forge |
-| **HMAC** | Shared symmetric key | Integrity + Authentication (shared identity) |
-| **Digital Signature** | Asymmetric key pair | Integrity + Authentication + Non-repudiation |
+```
+HMAC                          Digital Signature
+──────────────────────────    ─────────────────────────
+✓ Both parties share a key    ✓ No shared key needed
+✓ Very fast                   ✓ Public verification
+✓ Simple                      ✓ Non-repudiation
+✗ Requires key exchange       ✗ Slower
+✗ No non-repudiation          ✗ More complex
 
-Use HMAC when both parties share a secret (same system, microservices, APIs).
-Use signatures when parties do not share a secret (public software distribution, TLS).
-
----
-
-## HMAC Applications
-
-| Application | How HMAC Is Used |
-|-------------|-----------------|
-| **API authentication** | HMAC-SHA256 of request body — AWS Signature V4 |
-| **JWT (HS256)** | HMAC signs the token claims |
-| **TLS** | HMAC inside MAC-then-Encrypt (pre-TLS 1.3) |
-| **Cookie integrity** | HMAC prevents users from forging session cookies |
-| **PBKDF2** | Built on HMAC — see Lecture 8 |
+Use HMAC for:                 Use signatures for:
+• API authentication          • Software distribution
+• Session cookies             • TLS certificates
+• Microservice calls          • Legal documents
+• Webhook verification        • Public key systems
+```
 
 ---
 
-## HMAC vs Encrypted Data
+## Real-World HMAC Examples
 
-Common confusion: HMAC is NOT encryption.
+**AWS API Authentication (Signature V4):**
+```
+signature = HMAC-SHA256(
+    HMAC-SHA256(
+        HMAC-SHA256(
+            HMAC-SHA256("AWS4" + secret, date),
+            region),
+        service),
+    "aws4_request")
+```
 
-| | HMAC | Encryption |
-|--|------|-----------|
-| Purpose | Authenticity | Confidentiality |
-| Key | Shared symmetric | Symmetric or Asymmetric |
-| Reversible? | No | Yes |
-| Hides content? | No | Yes |
+**Cookie integrity:**
+```
+cookie = username + ":" + HMAC(secret, username + expires)
+server: recompute HMAC → check if cookie was tampered with
+```
 
-For both confidentiality and integrity: **Encrypt-then-MAC** or use **AEAD (GCM)**.
+**Webhook verification (GitHub, Stripe, etc.):**
+```
+X-Hub-Signature-256: sha256=HMAC(secret, request_body)
+```
 
 ---
 
-## Running the Example
+## Try It Yourself
 
 ```bash
 mvn exec:java -Dexec.mainClass="security.mac.HMACExample"
 ```
 
-Observe:
+**What to observe:**
 - Shared key generated
-- Alice computes HMAC tag for a message
-- Attacker modifies the message
-- Bob recomputes the tag → mismatch detected
-- Demonstration of timing-safe vs unsafe comparison
+- HMAC tag computed for original message
+- Mallory modifies message → tag verification fails
+- Timing comparison: measure `.equals()` vs `MessageDigest.isEqual()`
 
 ---
 
@@ -190,4 +239,4 @@ Observe:
 
 ## Next: Lecture 7
 # Key Exchange
-### Agreeing on a secret over an insecure channel
+### How to agree on a secret when everyone is watching

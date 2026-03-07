@@ -4,164 +4,205 @@ theme: default
 paginate: true
 style: |
   section { font-size: 1.4rem; }
-  section.lead h1 { font-size: 2.8rem; }
-  code { font-size: 1.1rem; }
+  section.lead h1 { font-size: 2.6rem; }
+  section.lead h2 { font-size: 1.8rem; color: #555; }
+  pre { font-size: 1rem; }
+  blockquote { border-left: 4px solid #f90; padding-left: 1em; color: #555; }
 ---
 
 <!-- _class: lead -->
 
 # Lecture 1
 ## Classical Ciphers
-
-Caesar · Vigenère · Frequency Analysis
-
----
-
-## Why Study Broken Ciphers?
-
-- Introduce vocabulary: key, shift, substitution
-- Show **why** security fails — small key space, patterns in output
-- Attacks on classical ciphers are the same attacks used today — just faster
-
-> "Those who cannot remember the past are condemned to repeat it."
+### Caesar · Vigenère · Why they failed
 
 ---
 
-## Caesar Cipher
+## The Story
 
-Each letter is shifted by a fixed amount. Used by Julius Caesar ~50 BCE.
+**50 BCE.** Julius Caesar needs to send military orders across the Roman Empire.
+Messengers can be captured. Letters can be intercepted.
+
+His solution: shift every letter in the message by 3 positions.
 
 ```
-Plaintext:   H  E  L  L  O
-Shifts:      +3 +3 +3 +3 +3
-Ciphertext:  K  H  O  O  R
+A → D     B → E     C → F   ...   Z → C
 ```
 
-```java
-char encrypt(char c, int shift) {
-    return (char) ('A' + (c - 'A' + shift) % 26);
-}
-```
+Only his generals knew the shift. Everyone else saw gibberish.
 
-**Key space:** only 25 possible keys — try them all in milliseconds.
+> This is the world's most famous encryption system — and it is trivially broken.
 
 ---
 
-## Caesar — Brute Force Attack
+## Caesar Cipher — How It Works
 
-Because there are only 25 possible keys, an attacker tries all of them:
+Shift each letter by a fixed amount (key = 3):
 
 ```
-Shift  1: Jgnnq Yqtnf   ← clearly wrong
-Shift  2: Ifmmp Xpsme   ← clearly wrong
-Shift  3: Hello World   ← found it!
-Shift  4: Gdkkn Vnqkc   ← clearly wrong
+Plaintext:    H  E  L  L  O     W  O  R  L  D
+Shift +3:     +3 +3 +3 +3 +3    +3 +3 +3 +3 +3
+Ciphertext:   K  H  O  O  R     Z  R  U  O  G
+```
+
+To decrypt, shift back by 3:
+
+```
+Ciphertext:   K  H  O  O  R
+Shift -3:     -3 -3 -3 -3 -3
+Plaintext:    H  E  L  L  O  ✓
+```
+
+**The key is just a single number (1–25). That's the entire secret.**
+
+---
+
+## Caesar in Pseudocode
+
+```
+function encrypt(letter, shift):
+    position = letter's position in alphabet  (A=0, B=1, ..., Z=25)
+    new_position = (position + shift) mod 26
+    return letter at new_position
+
+function decrypt(letter, shift):
+    same, but subtract shift instead of add
+```
+
+Example: `encrypt('H', 3)`
+- H is position 7
+- (7 + 3) mod 26 = 10
+- Position 10 = 'K' ✓
+
+---
+
+## Breaking Caesar — Brute Force
+
+There are only **25 possible keys**. Just try them all:
+
+```
+Try shift 1:  Jgnnq Yqtnf   ← doesn't look like English
+Try shift 2:  Ifmmp Xpsme   ← doesn't look like English
+Try shift 3:  Hello World   ← found it! ✓
+Try shift 4:  Gdkkn Vnqkc   ← doesn't look like English
 ...
 ```
 
-**No key is safe** when the key space is this small.
-A computer breaks any Caesar cipher in microseconds.
+A computer can try all 25 shifts in **microseconds**.
+
+> **Key space too small = cipher broken**
+> This is the first lesson of cryptography.
 
 ---
 
-## Frequency Analysis
+## Breaking Caesar — Frequency Analysis
 
-Even without the key, English letter frequencies expose the shift:
+Even smarter: you don't even need to try all shifts.
 
-| English | Frequency |
-|---------|-----------|
-| E | 12.7% |
-| T | 9.1% |
-| A | 8.2% |
+English letters appear with predictable frequency:
 
-If the most common ciphertext letter is `H`, then `H - E = 3` → shift is 3.
+```
+Most common in English:  E (12.7%)  T (9.1%)  A (8.2%)
+```
 
-**No computation needed** — just statistics.
+If you see the ciphertext letter `H` appears 12.7% of the time:
+
+```
+H is probably E.
+H − E = 7 − 4 = 3
+Shift is probably 3.
+```
+
+**No trial and error needed. Just statistics.**
 
 ---
 
-## Vigenère Cipher
+## Vigenère Cipher — A Better Idea
 
-Uses a repeating keyword. Different Caesar shift per position.
+Instead of one fixed shift, use a **keyword** that repeats:
 
 ```
 Plaintext:   H  E  L  L  O  W  O  R  L  D
-Keyword:     K  E  Y  K  E  Y  K  E  Y  K
+Keyword:     K  E  Y  K  E  Y  K  E  Y  K   ← "KEY" repeating
 Shifts:      10  4 24 10  4 24 10  4 24 10
 Ciphertext:  R  I  J  V  S  U  Y  V  J  N
 ```
 
-**Key space:** 26^N for keyword of length N — astronomically larger.
-Considered unbreakable for ~300 years.
+Now each letter uses a **different shift**:
+- Frequency analysis no longer works directly
+- Two identical letters can encrypt to different ciphertext letters
+
+Considered unbreakable for **300 years**.
 
 ---
 
-## Kasiski Examination — Breaking Vigenère
+## The Key Insight
 
-Babbage cracked it in 1854.
-
-**Key insight:** if the same plaintext fragment aligns with the same keyword fragment, it produces the same ciphertext.
+Why does frequency analysis fail on Vigenère?
 
 ```
-Ciphertext: ...XYZ....XYZ...
-Positions:     5    20
-Distance:  20 - 5 = 15
-Factors of 15: 1, 3, 5, 15  → keyword length is probably 3 or 5
+Plaintext:   E  E  E  E  E  E   (same letter, 6 times)
+Keyword:     K  E  Y  K  E  Y
+Shifts:      10  4 24 10  4 24
+Ciphertext:  O  I  C  O  I  C   (only 2 distinct, not all same)
 ```
 
-Split ciphertext into N Caesar streams → frequency-analyse each one independently.
+Each 'E' encrypts differently depending on its **position** relative to the keyword.
+
+Pattern is hidden — but not perfectly. The pattern repeats every keyword-length characters.
 
 ---
 
-## Index of Coincidence
+## Breaking Vigenère — Kasiski Test (1854)
 
-Measures how "English-like" a text is:
+If the same word appears at two positions whose distance is a multiple of the keyword length, they encrypt identically.
 
-| Text type | IC value |
-|-----------|----------|
-| Random | ~0.038 |
-| English plaintext | ~0.067 |
-| Vigenère ciphertext | 0.038 – 0.067 |
+```
+Ciphertext: ...THE...fourteen letters...THE...
+                ^                       ^
+           position 5              position 20
+           distance = 15
+           factors of 15: 1, 3, 5, 15
+           → keyword length is probably 3 or 5
+```
 
-IC closer to 0.067 → shorter key length.
-Iterate key lengths until IC of each stream reaches 0.067.
-
----
-
-## Lessons from Classical Ciphers
-
-| Lesson | Modern consequence |
-|--------|-------------------|
-| Small key space → brute force | AES uses 128+ bit keys (2^128 possibilities) |
-| Patterns preserved → frequency analysis | Modern ciphers appear random (pseudorandom permutation) |
-| Substitution alone is not enough | Need confusion **and** diffusion (Shannon 1949) |
-
-**Shannon's two principles still guide every modern cipher.**
+Once you know the keyword length, split into streams — each stream is just a Caesar cipher. Frequency-analyse each one.
 
 ---
 
-## Shannon's Principles (1949)
+## Classical Ciphers — Lessons Learned
 
-**Confusion** — each ciphertext bit depends on many key bits in a complex way.
-→ Prevents recovering the key from ciphertext.
+```
+┌─────────────────────────────────────────────────────┐
+│  LESSON 1: Key space must be astronomically large   │
+│            25 keys → broken instantly               │
+│            26^N keys → needs long random keys       │
+├─────────────────────────────────────────────────────┤
+│  LESSON 2: Patterns in output = weakness            │
+│            Same input → same output → frequency     │
+│            analysis works                           │
+├─────────────────────────────────────────────────────┤
+│  LESSON 3: Security must not rely on               │
+│            keeping the ALGORITHM secret             │
+│            Only the KEY should be secret            │
+└─────────────────────────────────────────────────────┘
+```
 
-**Diffusion** — changing one plaintext bit changes ~half the ciphertext bits.
-→ Prevents statistical analysis (avalanche effect).
-
-Caesar has neither. AES has both.
+Lesson 3 is **Kerckhoffs's principle** — still the foundation of modern crypto.
 
 ---
 
-## Running the Examples
+## Try It Yourself
 
 ```bash
 mvn exec:java -Dexec.mainClass="security.encryption.classic.CaesarCipher"
 mvn exec:java -Dexec.mainClass="security.encryption.classic.VigenereCipher"
 ```
 
-Observe:
-- Caesar: try all 25 shifts, see the plaintext appear
-- Vigenère: keyword repeats, same plaintext + same key position → same output
+**Experiment:**
+- Encrypt "HELLO" with shift 3 → should get "KHOOR"
+- Encrypt "HELLO" twice with same Vigenère key → same ciphertext
+- Encrypt "HELLOHELLO" — see the repeating pattern
 
 ---
 
@@ -169,4 +210,4 @@ Observe:
 
 ## Next: Lecture 2
 # Symmetric Encryption
-### AES — the global standard
+### AES — used in every HTTPS connection on Earth

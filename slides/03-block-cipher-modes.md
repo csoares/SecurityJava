@@ -4,106 +4,152 @@ theme: default
 paginate: true
 style: |
   section { font-size: 1.4rem; }
-  section.lead h1 { font-size: 2.8rem; }
-  code { font-size: 1.1rem; }
+  section.lead h1 { font-size: 2.6rem; }
+  section.lead h2 { font-size: 1.8rem; color: #555; }
+  pre { font-size: 1rem; }
+  blockquote { border-left: 4px solid #f90; padding-left: 1em; color: #555; }
 ---
 
 <!-- _class: lead -->
 
 # Lecture 3
 ## Block Cipher Modes
-
-ECB · CBC · GCM
-
----
-
-## The Problem: AES is a Block Cipher
-
-AES encrypts exactly 16 bytes at a time.
-
-What if your message is longer? Or shorter?
-What if two blocks of plaintext are identical?
-
-**Block cipher modes** define how AES is applied to arbitrary-length data.
-
-Choosing the wrong mode is a critical security mistake — even with a perfect key.
+### ECB · CBC · GCM — same key, very different results
 
 ---
 
-## ECB — Electronic Codebook (NEVER USE)
+## The Problem
 
-Each 16-byte block encrypted independently with the same key.
+AES encrypts exactly **16 bytes** at a time.
+
+What if your message is 1 KB? 1 MB? 1 GB?
+
+**Block cipher modes** define how AES is applied repeatedly to long data.
+
+Different modes give **completely different security properties** — even with the same perfect AES underneath.
+
+> Choosing the wrong mode is like having a strong safe but leaving the door open.
+
+---
+
+## Mode 1 — ECB: The Stamp of Doom
+
+**ECB = Electronic Codebook**
+
+Each 16-byte block is encrypted **independently**:
 
 ```
-Block 1: [plaintext_1] → AES(key) → [cipher_1]
-Block 2: [plaintext_2] → AES(key) → [cipher_2]
-Block 3: [plaintext_1] → AES(key) → [cipher_1]  ← SAME output!
+┌──────────┐        ┌──────────┐
+│ Block 1  │──AES──►│Cipher 1  │
+└──────────┘  key   └──────────┘
+
+┌──────────┐        ┌──────────┐
+│ Block 2  │──AES──►│Cipher 2  │
+└──────────┘  key   └──────────┘
+
+┌──────────┐        ┌──────────┐
+│ Block 1  │──AES──►│Cipher 1  │  ← SAME output as first block!
+└──────────┘  key   └──────────┘
 ```
 
 **Fatal flaw:** identical plaintext blocks → identical ciphertext blocks.
-Patterns in the data survive encryption.
 
 ---
 
-## The ECB Penguin — A Famous Demonstration
+## ECB Visualised — The Penguin Problem
 
-The Linux Tux penguin image encrypted with ECB:
+Encrypt a bitmap image of a penguin with ECB:
 
 ```
-Original image:        ECB encrypted:         CBC encrypted:
-  [Penguin]              [Penguin outline]       [Random noise]
-  Clearly visible!       Still recognisable!     Completely hidden
+Original image         ECB encrypted          GCM encrypted
+┌─────────────┐       ┌─────────────┐        ┌─────────────┐
+│             │       │             │        │▓▒░▓▒░▒▓░▒▓▒░│
+│   🐧        │  →    │   🐧        │   →    │░▓▒░▓▒░▓░▓▒░▓│
+│             │       │             │        │▒░▓▒░▓▒░▓▒░▓▒│
+└─────────────┘       └─────────────┘        └─────────────┘
+  Recognisable!       Still recognisable!     Looks random ✓
 ```
 
-ECB preserves the visual structure because identical pixel blocks produce identical encrypted blocks.
+ECB preserves patterns because pixels in the background are all the same colour → identical blocks → identical encrypted blocks.
 
-**ECB must never be used for real data.**
+**NEVER use ECB for real data.**
 
 ---
 
-## CBC — Cipher Block Chaining
+## Mode 2 — CBC: Chain the Blocks
 
-Each plaintext block is XOR'd with the previous ciphertext block before encryption.
+**CBC = Cipher Block Chaining**
+
+Each block is XOR'd with the previous ciphertext before encryption:
 
 ```
-IV → XOR(P1) → AES → C1
-C1 → XOR(P2) → AES → C2
-C2 → XOR(P3) → AES → C3
+IV──►XOR──►AES──►Cipher1──►XOR──►AES──►Cipher2──►XOR──►AES──►Cipher3
+     ▲              │              ▲              │
+  Block1            └──────────►Block2            └──────────►Block3
 ```
 
-- Identical plaintext blocks → different ciphertext (due to chaining)
-- Requires a random IV for the first block
-- **Weakness:** no built-in integrity — an attacker can flip bits in ciphertext to predictably alter plaintext
+Now identical blocks produce different ciphertext — patterns are hidden.
+
+**But CBC has a problem...**
 
 ---
 
-## CBC Padding Oracle Attack
+## CBC's Hidden Weakness — Padding Oracle
 
-CBC requires padding to fill the last block to 16 bytes.
+CBC needs padding to fill the last block to 16 bytes.
 
-If the server reveals whether padding is valid (even via timing), an attacker can:
-1. Flip bytes in the ciphertext
-2. Ask the server to decrypt
-3. Learn the plaintext byte by byte — **without the key**
+```
+Message: "Hello"  (5 bytes)
+Padding: "Hello" + [0x0B 0x0B 0x0B 0x0B 0x0B 0x0B 0x0B 0x0B 0x0B 0x0B 0x0B]
+                   ← 11 bytes of padding to reach 16 bytes
+```
 
-**Famous victims:** Lucky 13 (TLS), POODLE (SSL 3.0), many web frameworks.
+**Padding Oracle Attack:**
+If an app returns different errors for "bad padding" vs "bad data",
+an attacker can decrypt messages **without the key** by asking the server
+to decrypt modified ciphertext and watching which error comes back.
 
-**Lesson:** encryption alone is not enough — you need integrity too.
+Affected: TLS, many web frameworks (2011).
 
 ---
 
-## GCM — Galois/Counter Mode (Use This)
+## Mode 3 — GCM: The Right Answer
 
-GCM = AES-CTR encryption + GHASH authentication tag
+**GCM = Galois/Counter Mode**
+
+GCM does two things at once:
+```
+┌──────────────────────────────────────────────────────┐
+│  1. ENCRYPT the message (CTR mode — stream cipher)   │
+│     → confidentiality: message is unreadable         │
+├──────────────────────────────────────────────────────┤
+│  2. AUTHENTICATE with a tag (GHASH)                  │
+│     → integrity: any modification is detected        │
+└──────────────────────────────────────────────────────┘
+```
+
+GCM appends a **16-byte authentication tag** to the ciphertext.
+If anyone modifies even one bit of the ciphertext, decryption fails immediately.
+
+---
+
+## GCM Authentication Tag — What It Does
 
 ```
-Plaintext → AES-CTR(key, IV) → Ciphertext
-Ciphertext + AAD → GHASH(key) → Authentication Tag (16 bytes)
+Alice encrypts:  "Transfer $1000"
+                         │
+                    AES-GCM(key, iv)
+                         │
+               ciphertext + tag(XXXX)
+
+Mallory intercepts and changes one byte of ciphertext
+
+Bob decrypts:
+  recomputes tag → YYYY
+  YYYY ≠ XXXX → 💥 AEADBadTagException — REJECTED
 ```
 
-- **Confidentiality:** CTR mode (stream cipher, no padding needed)
-- **Integrity:** GHASH tag — any modification to ciphertext is detected
-- **Authenticated Encryption with Associated Data (AEAD)**
+**GCM gives you both encryption AND tamper detection in one step.**
 
 ---
 
@@ -111,76 +157,72 @@ Ciphertext + AAD → GHASH(key) → Authentication Tag (16 bytes)
 
 ```java
 Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
+
+// Encrypt — tag is automatically appended to ciphertext
 GCMParameterSpec spec = new GCMParameterSpec(128, iv); // 128-bit tag
-
-// Encrypt
 cipher.init(Cipher.ENCRYPT_MODE, key, spec);
-cipher.updateAAD(associatedData); // optional but recommended
 byte[] ciphertext = cipher.doFinal(plaintext);
-// ciphertext includes the 16-byte auth tag appended
+// ciphertext is 16 bytes longer than plaintext (the tag)
 
-// Decrypt (throws AEADBadTagException if tampered)
+// Decrypt — throws AEADBadTagException if tampered
 cipher.init(Cipher.DECRYPT_MODE, key, spec);
-byte[] plaintext = cipher.doFinal(ciphertext);
+byte[] plaintext = cipher.doFinal(ciphertext); // safe ✓
 ```
 
 ---
 
-## GCM: The IV Rule — Critical
+## GCM — The IV Reuse Catastrophe
 
-**Never reuse an IV with the same key in GCM.**
+⚠️ GCM has one critical rule: **never reuse an IV with the same key**.
 
 ```
-If IV is reused:
+If you encrypt two messages with the same key AND same IV:
+
   C1 = P1 XOR keystream
-  C2 = P2 XOR keystream   ← same keystream!
-  C1 XOR C2 = P1 XOR P2   ← attacker recovers XOR of plaintexts
-  AND the authentication key is fully recovered
+  C2 = P2 XOR keystream  ← same keystream!
+
+  C1 XOR C2 = P1 XOR P2  ← attacker recovers XOR of both plaintexts
+
+  AND the authentication key is completely recovered.
+  Every past and future message is broken.
 ```
 
-GCM IV reuse is far more catastrophic than CBC IV reuse.
-Use a random 96-bit IV for every message.
+Fix: generate a fresh random 12-byte IV for **every** message.
 
 ---
 
-## Mode Comparison
+## Mode Comparison — Decision Chart
 
-| Mode | Confidentiality | Integrity | Parallel | Notes |
-|------|----------------|-----------|----------|-------|
-| ECB | Weak (patterns) | None | Yes | **Never use** |
-| CBC | Good | None | Decrypt only | Padding oracle risk |
-| CTR | Good | None | Yes | Used inside GCM |
-| **GCM** | **Good** | **Yes** | **Yes** | **Use this** |
-
-GCM is the modern standard. TLS 1.3 only allows AEAD modes.
-
----
-
-## Associated Data in GCM
-
-GCM can authenticate additional data (AAD) that is not encrypted:
-
-```java
-cipher.updateAAD("sender=alice,recipient=bob".getBytes());
+```
+Do you need encryption?
+  │
+  ├─ No  → use HMAC (Lecture 6)
+  │
+  └─ Yes ──► Use AES
+               │
+               ├─ Do you need tamper detection too?
+               │    └─ Yes (almost always) → GCM ✓
+               │    └─ No → CTR
+               │
+               └─ Are you tempted to use ECB?
+                    └─ STOP. Never use ECB.
 ```
 
-The AAD is integrity-protected but not confidential.
-Use it for: headers, metadata, routing information.
-
-If the AAD is modified, decryption throws `AEADBadTagException`.
+**Default answer: AES-256-GCM with a random 12-byte IV.**
 
 ---
 
-## Running the Example
+## Try It Yourself
 
 ```bash
 mvn exec:java -Dexec.mainClass="security.encryption.modes.CipherModesComparison"
 ```
 
-Observe:
-- ECB: encrypt an image or repeated blocks — patterns survive
-- CBC: patterns disappear but no integrity check
-- GCM: encrypted + tamper detection via auth tag
+**What to observe:**
+- ECB: encrypt repeated blocks → see the identical ciphertext blocks
+- CBC: patterns disappear, but no tamper detection
+- GCM: tamper a single byte of ciphertext → exception thrown
+- GCM with wrong IV: decryption produces garbage
 
 ---
 
@@ -188,4 +230,4 @@ Observe:
 
 ## Next: Lecture 4
 # Hashing & Integrity
-### One-way functions and the avalanche effect
+### Digital fingerprints — one way only

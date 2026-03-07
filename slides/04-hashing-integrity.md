@@ -4,189 +4,187 @@ theme: default
 paginate: true
 style: |
   section { font-size: 1.4rem; }
-  section.lead h1 { font-size: 2.8rem; }
-  code { font-size: 1.1rem; }
+  section.lead h1 { font-size: 2.6rem; }
+  section.lead h2 { font-size: 1.8rem; color: #555; }
+  pre { font-size: 1rem; }
+  blockquote { border-left: 4px solid #f90; padding-left: 1em; color: #555; }
 ---
 
 <!-- _class: lead -->
 
 # Lecture 4
 ## Hashing & Integrity
-
-SHA-256 · Avalanche Effect · Merkle Trees · Limitations
-
----
-
-## What is a Hash Function?
-
-A function that maps **any input** to a **fixed-size output** (digest).
-
-```
-SHA-256("Hello, World!")  →  dffd6021bb2bd5b0...  (64 hex chars = 32 bytes)
-SHA-256("Hello, World?")  →  a0dc65ffca799873...  completely different!
-SHA-256(1 GB file)        →  some 32-byte value
-SHA-256(empty string)     →  e3b0c44298fc1c14...  still 32 bytes
-```
-
-**Key properties:**
-- Deterministic: same input always gives same output
-- Fixed output size regardless of input size
-- Fast to compute
+### Digital fingerprints — one way only
 
 ---
 
-## Properties of a Cryptographic Hash
+## The Fingerprint Analogy
 
-| Property | Meaning |
-|----------|---------|
-| **Pre-image resistance** | Given hash H, cannot find input M where SHA(M)=H |
-| **Second pre-image resistance** | Given M, cannot find M' ≠ M where SHA(M)=SHA(M') |
-| **Collision resistance** | Cannot find any M, M' where SHA(M)=SHA(M') |
+A hash function is like taking a fingerprint:
 
-These properties make hashes useful for integrity verification.
-**SHA-256 satisfies all three.** MD5 and SHA-1 do not (collisions found).
+```
+Person ──fingerprint──► 🖊️ unique pattern
+```
+
+- You can go from person → fingerprint (easy)
+- You **cannot** go from fingerprint → reconstruct the person (impossible)
+- Two different people have different fingerprints (almost certainly)
+- The fingerprint is always the same size regardless of the person
+
+A hash function works the same way — but for data.
+
+---
+
+## What a Hash Does
+
+Takes **any** input, produces a **fixed-size** output (the "digest"):
+
+```
+SHA-256("Hello, World!") → dffd6021bb2bd5b0af676290809ec3a5  (32 bytes)
+SHA-256("Hello, World?") → a0dc65ffca799873f86f8d5e7a26a34f  (32 bytes, totally different!)
+SHA-256(a 1 GB movie)   → some 32-byte value                  (still 32 bytes!)
+SHA-256("")              → e3b0c44298fc1c149afbf4c8996fb924  (32 bytes)
+```
+
+Properties:
+- **Fast** to compute
+- **Fixed** output size (SHA-256 always = 32 bytes)
+- **One-way** — cannot reverse it
+- **Deterministic** — same input always gives same output
 
 ---
 
 ## The Avalanche Effect
 
-A single-bit change in input causes ~50% of output bits to flip.
+Change one character — the entire hash changes:
 
 ```
 SHA-256("Hello, this is a sample text!")
-→  b94d27b9934d3e08a52e52d7da7dabfac484efe04294e576
+→  b94d27b9934d3e08a52e52d7da7dabfac484efe0
 
 SHA-256("Hello, this is a sample TEXT!")
-→  9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822
+→  9f86d081884c7d659a2feaa0c55ad015a3bf4f1b
+   ↑ completely different!
 
-Difference: completely different — no correlation visible
+SHA-256("Hello, this is a sample text?")
+→  6367c48dd193d56ea7b0baad25b19455e529f5e
+   ↑ completely different!
 ```
 
-This prevents statistical analysis of hash outputs.
+There is **no relationship** between small input changes and output changes.
+This prevents attackers from guessing what the original input was.
 
 ---
 
-## Integrity Verification
+## Using Hashes for Integrity
 
 ```
-Sender                              Receiver
-  |                                    |
-  | hash = SHA256(file)                |
-  | send(file, hash) ─────────────────>|
-  |                                    | hash2 = SHA256(received_file)
-  |                                    | if hash == hash2: OK
-  |                                    | else: TAMPERED
+Alice sends a large file to Bob:
+
+ALICE:
+  file = "contract.pdf"
+  hash = SHA256(file) = "b94d27b9..."
+  sends: file + hash
+
+MALLORY intercepts, changes "£1000" to "£9000" in the file
+
+BOB receives:
+  hash2 = SHA256(received_file) = "7f3a91c..." ← different!
+  hash2 ≠ hash → 🚨 FILE WAS TAMPERED! REJECT.
 ```
 
-Used for:
-- Software download verification
-- Git commit IDs
-- Database record checksums
-- TLS record integrity (inside GCM)
-
----
-
-## What a Hash Does NOT Prove
-
-```java
-// Receiver computes:
-String received_hash = sha256(receivedData);
-String expected_hash = sha256(originalData);
-boolean intact = received_hash.equals(expected_hash);
-```
-
-**Problem:** an attacker who intercepts the transmission can:
-1. Modify the data
-2. Recompute the hash
-3. Send both the new data and new hash
-
-A plain hash proves **integrity only if the hash is delivered separately and securely**.
-
-→ Solution: HMAC (Lecture 6) or Digital Signatures (Lecture 5)
+Used everywhere: software downloads, Git commits, TLS records.
 
 ---
 
 ## Hashing in Java
 
 ```java
+// Compute SHA-256 hash
 MessageDigest digest = MessageDigest.getInstance("SHA-256");
-byte[] hash = digest.digest(data.getBytes(StandardCharsets.UTF_8));
+byte[] hash = digest.digest("Hello, World!".getBytes(StandardCharsets.UTF_8));
 
 // Convert to hex string for display
 StringBuilder hex = new StringBuilder();
 for (byte b : hash) {
     hex.append(String.format("%02x", b));
 }
-System.out.println(hex.toString()); // 64-char hex string
+System.out.println(hex.toString());
+// → "dffd6021bb2bd5b0af676290809ec3a5..."
+```
+
+Alternatively in many frameworks:
+```java
+String hash = DigestUtils.sha256Hex(data); // Apache Commons Codec
 ```
 
 ---
 
-## Hash Algorithms — What to Use
+## What Hashing Does NOT Solve
 
-| Algorithm | Output | Status |
-|-----------|--------|--------|
-| MD5 | 128 bits | **Broken** — collisions found (1996) |
-| SHA-1 | 160 bits | **Broken** — Google SHAttered (2017) |
-| **SHA-256** | 256 bits | **Safe** — use this |
-| **SHA-3-256** | 256 bits | **Safe** — different construction |
-| **BLAKE2** | variable | **Safe** — faster than SHA-256 |
+A plain hash does **not** prove identity:
 
-Never use MD5 or SHA-1 for security purposes.
-SHA-256 is the default choice.
+```
+Mallory intercepts Alice's file + hash.
+
+Mallory modifies the file:
+  new_file = modified version
+  new_hash = SHA256(new_file)  ← easy to recompute!
+
+Mallory sends: new_file + new_hash
+
+Bob checks: SHA256(new_file) == new_hash ✓  ← passes! Bob is fooled.
+```
+
+**The hash must be delivered separately and securely.**
+Otherwise use HMAC (Lecture 6) or Digital Signatures (Lecture 5).
 
 ---
 
-## Merkle Trees
-
-Hash trees allow efficient integrity verification of large datasets.
+## Hash Algorithms — Which to Use
 
 ```
-         Root = H(H12 + H34)
-        /                  \
-  H12 = H(H1+H2)     H34 = H(H3+H4)
-   /         \           /        \
- H1=H(B1)  H2=H(B2)  H3=H(B3)  H4=H(B4)
-    |          |          |          |
-  Block1    Block2     Block3    Block4
+MD5         ❌ Broken — collisions found in 1996
+SHA-1       ❌ Broken — Google collision in 2017 (SHAttered attack)
+SHA-256     ✅ Safe — use this for general purpose
+SHA-3-256   ✅ Safe — different mathematical construction
+BLAKE2      ✅ Safe — faster than SHA-256, used in many tools
 ```
 
-To verify Block3, you only need: H3, H4, H12, and Root.
-You do **not** need to download all blocks.
+> Real example: The SHAttered attack created two different PDF files with the **exact same SHA-1 hash**. Cost: about $100,000 in cloud computing.
 
-Used in: Git, Bitcoin, certificate transparency logs.
+SHA-256 has no known collision after 25+ years.
 
 ---
 
-## Git Uses SHA-1 (Moving to SHA-256)
+## Fun Fact: Git Uses Hashes
 
-Every Git commit is identified by a SHA-1 hash of its contents:
+Every Git commit is identified by a SHA-1 hash:
 
 ```bash
 git log --oneline
-a3f2bc1 Add encryption example
+a3f2bc1 Add encryption example     ← "a3f2bc1" is SHA-1 of commit content
 7d4e8f2 Fix bug in cipher mode
-...
 ```
 
-Changing any file in history changes all subsequent commit hashes.
-This makes the Git history tamper-evident.
+If anyone modifies a file in history → all subsequent commit hashes change.
+The history is tamper-evident — you'd immediately notice.
 
-GitHub is migrating to SHA-256 due to SHA-1 collision vulnerabilities.
+(GitHub is migrating to SHA-256 due to SHA-1 vulnerabilities)
 
 ---
 
-## Running the Example
+## Try It Yourself
 
 ```bash
 mvn exec:java -Dexec.mainClass="security.encryption.integrity.IntegrityCheckHash"
 ```
 
-Observe:
-- Hash of original string
-- Hash after changing one character — completely different output (avalanche)
-- Integrity check passing for unmodified data
-- Integrity check failing after tampering
+**What to observe:**
+- Hash of a string — 64 hex chars always
+- Change one letter → completely different hash (avalanche effect)
+- Integrity check passes with original data
+- Integrity check fails after any modification to the data
 
 ---
 
@@ -194,4 +192,4 @@ Observe:
 
 ## Next: Lecture 5
 # Digital Signatures
-### Proving identity with asymmetric cryptography
+### Wax seals for the digital age

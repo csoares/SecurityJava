@@ -4,169 +4,221 @@ theme: default
 paginate: true
 style: |
   section { font-size: 1.4rem; }
-  section.lead h1 { font-size: 2.8rem; }
-  code { font-size: 1.1rem; }
+  section.lead h1 { font-size: 2.6rem; }
+  section.lead h2 { font-size: 1.8rem; color: #555; }
+  pre { font-size: 1rem; }
+  blockquote { border-left: 4px solid #f90; padding-left: 1em; color: #555; }
 ---
 
 <!-- _class: lead -->
 
 # Lecture 2
 ## Symmetric Encryption
-
-AES · Keys · IVs · Block vs Stream
-
----
-
-## What is Symmetric Encryption?
-
-One key is used for both encryption and decryption.
-
-```
-Alice                          Bob
-  |                              |
-  |--- encrypt(data, key) ------>|
-  |         ciphertext           |
-  |                    decrypt(ciphertext, key)
-  |                              |
-```
-
-Both parties must already share the key.
-**Problem:** how do you securely share that key? → Lecture 7 (Key Exchange)
+### AES — one key to lock, same key to unlock
 
 ---
 
-## AES — Advanced Encryption Standard
+## The Padlock Analogy
 
-- Adopted as global standard by NIST in 2001
-- Block cipher: operates on 128-bit (16-byte) blocks
-- Key sizes: **128**, 192, or **256** bits
-- Based on substitution-permutation network (SPN)
+Symmetric encryption is like a **combination padlock**:
 
-```java
-KeyGenerator keyGen = KeyGenerator.getInstance("AES");
-keyGen.init(256); // 128, 192, or 256
-SecretKey key = keyGen.generateKey();
+```
+Alice                              Bob
+  📦  +  🔒 (lock it)               🔒 + 🔑 (unlock it)
+  message   key: 1234              same key: 1234
 ```
 
-AES is used everywhere: TLS, disk encryption, Wi-Fi (WPA2), file encryption.
+- Both Alice and Bob use the **same key**
+- Lock = encrypt,  Unlock = decrypt
+- If Eve intercepts the box, she can't open it without the key
+
+**The challenge:** how do Alice and Bob agree on the key in the first place?
+(That's Lecture 7 — Key Exchange)
+
+---
+
+## AES — The Global Standard
+
+AES (Advanced Encryption Standard) was chosen by the US government in 2001 after a public competition. It replaced the aging DES.
+
+```
+AES facts:
+  ✓ Used in every HTTPS connection
+  ✓ Used for disk encryption (FileVault, BitLocker)
+  ✓ Used in Wi-Fi (WPA2/WPA3)
+  ✓ Used in messaging apps (Signal, WhatsApp)
+  ✓ Built into CPUs as hardware instructions (AES-NI)
+  ✓ No known practical attacks after 25 years
+```
+
+**If you use one algorithm from this course, it's AES.**
 
 ---
 
 ## How AES Works (Simplified)
 
-AES applies 10–14 rounds (depending on key size), each doing 4 operations:
+AES scrambles data in **rounds** — like shuffling a deck of cards many times:
 
-| Step | Operation | Purpose |
-|------|-----------|---------|
-| **SubBytes** | S-box substitution | Confusion |
-| **ShiftRows** | Row permutation | Diffusion |
-| **MixColumns** | Column mixing | Diffusion |
-| **AddRoundKey** | XOR with key schedule | Key mixing |
+```
+Plaintext (16 bytes)
+     │
+     ▼
+┌─────────────┐
+│  Round 1    │ ← substitute bytes, shift rows, mix columns, add key
+├─────────────┤
+│  Round 2    │ ← same operations, different key material
+├─────────────┤
+│    ...      │ ← AES-256 = 14 rounds total
+├─────────────┤
+│  Round 14   │
+└─────────────┘
+     │
+     ▼
+Ciphertext (16 bytes, looks completely random)
+```
 
-After every round, the output looks completely random.
+Each round adds more confusion. After 14 rounds — unbreakable.
 
 ---
 
-## Key Size vs Security
+## Key Size Matters — A Lot
 
-| Key size | Possible keys | Brute-force time (1 trillion guesses/sec) |
-|----------|--------------|------------------------------------------|
-| 56-bit (DES) | 7.2 × 10^16 | ~83 days — **cracked in 1998** |
-| 128-bit AES | 3.4 × 10^38 | ~10^19 years |
-| 256-bit AES | 1.2 × 10^77 | longer than universe's age |
+```
+┌──────────────┬──────────────────┬─────────────────────────────┐
+│  Key size    │  Possible keys   │  Time to brute force        │
+├──────────────┼──────────────────┼─────────────────────────────┤
+│  DES 56-bit  │  72 trillion     │  Hours — BROKEN in 1998     │
+│  AES 128-bit │  340 undecillion │  ~10^19 years               │
+│  AES 256-bit │  10^77           │  longer than universe age   │
+└──────────────┴──────────────────┴─────────────────────────────┘
+```
 
-**Use AES-256.** There is no known attack significantly better than brute force.
+> "If every atom in the observable universe were a computer checking a billion keys per second, you still could not brute-force AES-128 in the universe's lifetime."
+
+**Use AES-256. It costs nothing extra.**
 
 ---
 
-## Encryption and Decryption in Java
+## AES in Java — Generate a Key
 
 ```java
-// Encrypt
+// Step 1: Generate a random 256-bit key
+KeyGenerator keyGen = KeyGenerator.getInstance("AES");
+keyGen.init(256, new SecureRandom());  // 256-bit key
+SecretKey key = keyGen.generateKey();
+
+// The key is just 32 random bytes:
+// [0xA3, 0x7F, 0x12, 0xBB, ... 32 bytes total]
+```
+
+⚠️ **Never do this:**
+```java
+SecretKey key = new SecretKeySpec("mysecretpassword".getBytes(), "AES");
+// passwords are short and predictable — bad keys!
+```
+
+---
+
+## AES in Java — Encrypt and Decrypt
+
+```java
 Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
+
+// Encrypt
 cipher.init(Cipher.ENCRYPT_MODE, key, new GCMParameterSpec(128, iv));
-byte[] ciphertext = cipher.doFinal(plaintext.getBytes());
+byte[] ciphertext = cipher.doFinal("Hello, Bob!".getBytes());
 
 // Decrypt
 cipher.init(Cipher.DECRYPT_MODE, key, new GCMParameterSpec(128, iv));
-byte[] decrypted = cipher.doFinal(ciphertext);
+byte[] plaintext = cipher.doFinal(ciphertext);
+
+System.out.println(new String(plaintext)); // → "Hello, Bob!"
 ```
 
-Three choices in `"AES/GCM/NoPadding"`:
-1. **Algorithm** — AES
-2. **Mode** — GCM (→ Lecture 3)
-3. **Padding** — NoPadding (GCM handles it)
+Three parts of `"AES/GCM/NoPadding"`:
+1. **AES** — algorithm
+2. **GCM** — mode (how to handle multiple blocks → Lecture 3)
+3. **NoPadding** — GCM handles variable length automatically
 
 ---
 
-## The IV — Initialisation Vector
+## What is an IV?
 
-A random value combined with the key to make each encryption unique.
+**IV = Initialisation Vector** — a random value to make each encryption unique.
+
+```
+Problem without IV:
+  encrypt("Hello", key) → X9A3...
+  encrypt("Hello", key) → X9A3...   ← identical! Eve notices patterns
+
+Solution with IV:
+  encrypt("Hello", key, iv1) → X9A3...
+  encrypt("Hello", key, iv2) → 7F2B...  ← completely different! ✓
+```
 
 ```java
-byte[] iv = new byte[12]; // 96 bits for GCM
-new SecureRandom().nextBytes(iv);
+byte[] iv = new byte[12];          // 12 bytes = 96 bits
+new SecureRandom().nextBytes(iv);  // random every time
 ```
 
-**Rule:** never reuse the same IV with the same key.
-
-```
-Same key + Same IV + Different messages = CATASTROPHIC failure
-Same key + New IV  + Different messages = Safe
-```
-
-The IV is not secret — it is sent alongside the ciphertext.
+**The IV is NOT secret** — send it alongside the ciphertext.
+**Rule: never reuse the same IV with the same key.**
 
 ---
 
-## Base64 — Transmitting Binary Data
+## What is Base64?
 
-Encrypted output is raw bytes. To store or transmit as text, encode in Base64.
+Encrypted data is raw bytes (binary). Binary data doesn't travel well in emails, JSON, or databases.
+
+**Base64 converts binary to printable text:**
+
+```
+Binary:  [0xFF, 0x3A, 0x9C]
+Base64:  "/zqc"           ← only uses A-Z, a-z, 0-9, +, /
+```
 
 ```java
 String encoded = Base64.getEncoder().encodeToString(ciphertext);
-byte[] decoded  = Base64.getDecoder().decode(encoded);
+// → "X9A37FmB9z..." — safe to store anywhere
+
+byte[] back = Base64.getDecoder().decode(encoded);
 ```
 
-```
-Binary:  [0xFF, 0x3A, 0x9C, 0x11, ...]
-Base64:  "/zqcEQ=="
-```
-
-Base64 adds ~33% size overhead. It is **not** encryption — it is encoding only.
+> ⚠️ Base64 is NOT encryption. It's just a way to represent bytes as text.
+> Anyone can decode it.
 
 ---
 
-## Key Storage — What NOT to Do
+## Full Flow: Encrypt → Store → Decrypt
 
-```java
-// BAD — hardcoded key
-String key = "mysecretkey12345";
-
-// BAD — derived from weak source
-SecretKey key = new SecretKeySpec("password".getBytes(), "AES");
-
-// GOOD — generated securely
-KeyGenerator gen = KeyGenerator.getInstance("AES");
-gen.init(256, new SecureRandom());
-SecretKey key = gen.generateKey();
 ```
+ENCRYPT:
+  plaintext = "Transfer $1000"
+  key = random 256-bit key
+  iv  = random 96-bit value
+  ciphertext = AES-GCM(plaintext, key, iv)
+  store: Base64(iv) + ":" + Base64(ciphertext)
 
-Keys must be stored in a **KeyStore**, **HSM**, or a secrets manager — never in source code.
+DECRYPT:
+  split stored value on ":"
+  iv        = Base64.decode(first part)
+  ciphertext = Base64.decode(second part)
+  plaintext = AES-GCM-decrypt(ciphertext, key, iv)
+```
 
 ---
 
-## Running the Example
+## Try It Yourself
 
 ```bash
 mvn exec:java -Dexec.mainClass="security.encryption.symmetric.SymmetricEncryptionExample"
 ```
 
-You will see:
-- Random AES-256 key generated
-- Random IV generated
-- Plaintext encrypted → Base64 encoded ciphertext
-- Ciphertext decrypted → original plaintext recovered
+**What to observe:**
+- The key is 32 random bytes — looks like noise
+- The IV is 12 random bytes — different every run
+- The same plaintext encrypts to a different ciphertext every run (because IV changes)
+- Decryption restores the original perfectly
 
 ---
 
